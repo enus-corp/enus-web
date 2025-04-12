@@ -173,18 +173,18 @@ const SignUpLink = styled.div`
 `;
 
 // --- Snackbar Styles ---
-const Snackbar = styled.div<{ isVisible: boolean; isError?: boolean }>`
+const Snackbar = styled.div<{ $isVisible: boolean; isError?: boolean }>`
   position: fixed;
   bottom: 30px;
   left: 50%;
-  transform: translateX(-50%) translateY(${props => props.isVisible ? '0' : '100px'});
+  transform: translateX(-50%) translateY(${props => props.$isVisible ? '0' : '100px'});
   background-color: ${props => props.isError ? '#F8D7DA' : '#D1E7DD'}; /* Success is default green */
   color: ${props => props.isError ? '#721C24' : '#0F5132'};
   padding: 12px 25px;
   border-radius: 8px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   z-index: 1100;
-  opacity: ${props => props.isVisible ? 1 : 0};
+  opacity: ${props => props.$isVisible ? 1 : 0};
   transition: transform 0.4s ease-in-out, opacity 0.4s ease-in-out;
   font-family: 'Avenir', sans-serif;
   font-size: 15px;
@@ -376,7 +376,7 @@ const LoginPage: React.FC = () => {
         <AnimatedShape3 />
       </RightPanel>
 
-      <Snackbar isVisible={snackbar.isVisible} isError={snackbar.isError}>
+      <Snackbar $isVisible={snackbar.isVisible} isError={snackbar.isError}>
         {snackbar.message}
       </Snackbar>
     </LoginPageContainer>
