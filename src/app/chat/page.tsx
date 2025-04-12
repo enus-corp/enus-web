@@ -4,7 +4,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
 
 // --- Mock Data ---
-// In a real app, this would come from your backend/state management
 const mockChatHistory = [
   { id: 'chat1', title: 'Summary of Tech News Today', lastMessage: 'AI advancements dominate headlines...' },
   { id: 'chat2', title: 'Questions about Market Trends', lastMessage: 'Can you explain the recent dip?' },
