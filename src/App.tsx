@@ -5,7 +5,6 @@ const App: React.FC = () => {
   return (
     <>
       <GlobalStyle />
-      {/* Your routes will go here */}
     </>
   );
 };

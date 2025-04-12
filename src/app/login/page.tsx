@@ -5,6 +5,7 @@ import styled, { keyframes } from 'styled-components';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { loginUser } from '../../services/auth';
 
 // --- Styled Components ---
 
@@ -145,6 +146,25 @@ const SignUpLink = styled.div`
   }
 `;
 
+// --- Snackbar Styles ---
+const Snackbar = styled.div<{ isVisible: boolean; isError?: boolean }>`
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%) translateY(${props => props.isVisible ? '0' : '100px'});
+  background-color: ${props => props.isError ? '#F8D7DA' : '#D1E7DD'}; /* Success is default green */
+  color: ${props => props.isError ? '#721C24' : '#0F5132'};
+  padding: 12px 25px;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  z-index: 1100;
+  opacity: ${props => props.isVisible ? 1 : 0};
+  transition: transform 0.4s ease-in-out, opacity 0.4s ease-in-out;
+  font-family: 'Avenir', sans-serif;
+  font-size: 15px;
+  text-align: center;
+`;
+
 // --- Right Panel (Dynamic Image/Animation) ---
 
 const RightPanel = styled.div`
@@ -213,15 +233,54 @@ const AnimatedShape3 = styled(AnimatedShape)`
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [snackbar, setSnackbar] = useState<{ message: string; isVisible: boolean; isError?: boolean }>({ 
+      message: '', 
+      isVisible: false, 
+      isError: false 
+  });
   const router = useRouter();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const showSnackbar = (message: string) => {
+    setSnackbar({ message, isVisible: true, isError: false });
+    setTimeout(() => {
+      setSnackbar(prev => ({ ...prev, isVisible: false })); 
+    }, 4000); 
+  };
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    router.push('/chat');
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const tokenData = await loginUser({ email, password });
+      console.log("Login successful, tokens:", tokenData);
+      
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('accessToken', tokenData.accessToken);
+        localStorage.setItem('refreshToken', tokenData.refreshToken);
+      }
+      
+      showSnackbar('Login Successful! Redirecting...');
+
+      setTimeout(() => {
+        router.push('/chat');
+      }, 1500);
+
+    } catch (err: unknown) {
+      console.error("Login error:", err);
+      if (err instanceof Error) {
+        setError(err.message || 'Login failed. Please try again.');
+      } else {
+        setError('An unknown error occurred during login.');
+      }
+      setIsLoading(false);
+    }
   };
 
   const handleOAuth = (provider: string) => {
-    // TODO: Implement OAuth logic
     console.log(`OAuth login attempt with: ${provider}`);
     alert(`${provider} login not implemented yet.`);
   };
@@ -231,6 +290,7 @@ const LoginPage: React.FC = () => {
       <LeftPanel>
         <LoginForm onSubmit={handleLogin}>
           <Title>Welcome Back</Title>
+          {error && <p style={{ color: 'red', textAlign: 'center' }}>{error}</p>}
           <InputField
             type="email"
             placeholder="Email Address"
@@ -238,6 +298,7 @@ const LoginPage: React.FC = () => {
             onChange={(e) => setEmail(e.target.value)}
             required
             autoComplete="email"
+            disabled={isLoading}
           />
           <InputField
             type="password"
@@ -246,20 +307,20 @@ const LoginPage: React.FC = () => {
             onChange={(e) => setPassword(e.target.value)}
             required
             autoComplete="current-password"
+            disabled={isLoading}
           />
-          <SubmitButton type="submit">Log In</SubmitButton>
+          <SubmitButton type="submit" disabled={isLoading}>
+            {isLoading ? 'Logging in...' : 'Log In'}
+          </SubmitButton>
           <Divider>or continue with</Divider>
           <OAuthContainer>
             <OAuthButton type="button" onClick={() => handleOAuth('Google')} aria-label="Login with Google">
-              {/* Placeholder: Replace with actual Google icon */}
               <Image src="/icons/google.svg" alt="Google Login" width={28} height={28} />
             </OAuthButton>
-             <OAuthButton type="button" onClick={() => handleOAuth('Kakao')} aria-label="Login with Kakao">
-               {/* Placeholder: Replace with actual Kakao icon */}
+            <OAuthButton type="button" onClick={() => handleOAuth('Kakao')} aria-label="Login with Kakao">
               <Image src="/icons/kakao.svg" alt="Kakao Login" width={28} height={28} />
             </OAuthButton>
-             <OAuthButton type="button" onClick={() => handleOAuth('Naver')} aria-label="Login with Naver">
-               {/* Placeholder: Replace with actual Naver icon */}
+            <OAuthButton type="button" onClick={() => handleOAuth('Naver')} aria-label="Login with Naver">
               <Image src="/icons/naver.svg" alt="Naver Login" width={28} height={28} />
             </OAuthButton>
           </OAuthContainer>
@@ -269,11 +330,14 @@ const LoginPage: React.FC = () => {
         </LoginForm>
       </LeftPanel>
       <RightPanel>
-        {/* Reverted to floating shapes animation */}
         <AnimatedShape1 />
         <AnimatedShape2 />
         <AnimatedShape3 />
       </RightPanel>
+
+      <Snackbar isVisible={snackbar.isVisible} isError={snackbar.isError}>
+        {snackbar.message}
+      </Snackbar>
     </LoginPageContainer>
   );
 };

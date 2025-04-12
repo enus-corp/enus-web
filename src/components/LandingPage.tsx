@@ -194,8 +194,8 @@ const LandingPage: React.FC = () => {
             <Description>
               Get AI-powered news summaries in seconds. Ask questions, dive deeper, and stay updated without the overwhelm. Your personal news assistant that helps you understand the world better.
             </Description>
-            <Link href="/login" passHref>
-              <Button as="a">Try Now</Button>
+            <Link href="/login">
+              <Button>Try Now</Button>
             </Link>
           </TextContent>
           
