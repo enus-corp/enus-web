@@ -6,6 +6,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { loginUser } from '../../services/auth';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 
 // --- Styled Components ---
 
@@ -56,6 +58,30 @@ const InputField = styled.input`
     outline: none;
     border-color: #A0D9B1; /* Green accent on focus */
     box-shadow: 0 0 0 3px rgba(160, 217, 177, 0.3); /* Green focus ring */
+  }
+`;
+
+const InputWrapper = styled.div`
+  position: relative;
+  width: 100%;
+  display: flex; /* Align items if needed, though button is absolute */
+`;
+
+// Password visibility toggle button
+const PasswordToggleButton = styled.button`
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  color: #6C757D; 
+  line-height: 1;
+
+  &:hover {
+    color: #252525;
   }
 `;
 
@@ -233,6 +259,7 @@ const AnimatedShape3 = styled(AnimatedShape)`
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [snackbar, setSnackbar] = useState<{ message: string; isVisible: boolean; isError?: boolean }>({ 
@@ -247,6 +274,10 @@ const LoginPage: React.FC = () => {
     setTimeout(() => {
       setSnackbar(prev => ({ ...prev, isVisible: false })); 
     }, 4000); 
+  };
+
+  const togglePasswordVisibility = () => {
+    setIsPasswordVisible(!isPasswordVisible);
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -300,15 +331,25 @@ const LoginPage: React.FC = () => {
             autoComplete="email"
             disabled={isLoading}
           />
-          <InputField
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            autoComplete="current-password"
-            disabled={isLoading}
-          />
+          <InputWrapper>
+            <InputField
+              type={isPasswordVisible ? "text" : "password"}
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              autoComplete="current-password"
+              disabled={isLoading}
+              style={{ paddingRight: '50px', width: '100%' }}
+            />
+            <PasswordToggleButton
+              type="button"
+              onClick={togglePasswordVisibility}
+              aria-label={isPasswordVisible ? "Hide password" : "Show password"}
+            >
+              <FontAwesomeIcon icon={isPasswordVisible ? faEyeSlash : faEye} size="lg" />
+            </PasswordToggleButton>
+          </InputWrapper>
           <SubmitButton type="submit" disabled={isLoading}>
             {isLoading ? 'Logging in...' : 'Log In'}
           </SubmitButton>
