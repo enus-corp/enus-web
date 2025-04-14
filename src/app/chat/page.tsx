@@ -1,12 +1,31 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import Sidebar from '@/components/chat/Sidebar';
 import SideTrail from '@/components/chat/SideTrail';
 import SettingsModal from '@/components/chat/SettingsModal';
 import ChatPanel from '@/components/chat/mainPanel/ChatArea';
 import { Message } from '@/components/chat/mainPanel/types';
+import { useUser } from '@/contexts/UserContext';
+import axiosInstance from '@/lib/axios';
+
+interface GeneralServerResponse<T> {
+  error: boolean;
+  message: string;
+  code: number;
+  data: T | null;
+}
+
+interface UserDTO {
+  userId: number;
+  firstName: string;
+  lastName: string;
+  username: string;
+  email: string;
+  gender: 'MALE' | 'FEMALE' | 'OTHER';
+  isOauthUser: boolean;
+}
 
 // --- Mock Data ---
 const mockChatHistory = [
@@ -36,6 +55,7 @@ const ChatLayoutContainer = styled.div`
 
 // --- Chat Page Component ---
 const ChatPage: React.FC = () => {
+  const { user, setUser } = useUser();
   const [currentChatId, setCurrentChatId] = useState<string | null>(mockChatHistory[0]?.id || null);
   const [messages, setMessages] = useState<Message[]>(mockMessages);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -43,6 +63,27 @@ const ChatPage: React.FC = () => {
   const [activeIcon, setActiveIcon] = useState<'chat' | 'config' | null>('chat');
 
   const activeChat = mockChatHistory.find(chat => chat.id === currentChatId);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const { data: response } = await axiosInstance.get<GeneralServerResponse<UserDTO>>('/api/user/self', {
+          withCredentials: true
+        });
+        
+        if (!response.error && response.data) {
+          console.log(response.data)
+          setUser(response.data);
+        } else {
+          console.error('Error fetching user data:', response.message);
+        }
+      } catch (error) {
+        console.error('Failed to fetch user data:', error);
+      }
+    };
+
+    fetchUserData();
+  }, [setUser]);
 
   const handleSendMessage = (message: string) => {
     const userMessage = {
@@ -79,7 +120,7 @@ const ChatPage: React.FC = () => {
         isSidebarOpen={isSidebarOpen}
         onToggleSidebar={toggleSidebar}
         onOpenSettings={() => setIsModalOpen(true)}
-        username="John Doe"
+        username={user?.username || 'Guest'}
         activeIcon={activeIcon}
         onIconClick={handleIconClick}
       />
@@ -108,12 +149,14 @@ const ChatPage: React.FC = () => {
         onConfigChange={() => {}}
       />
 
-      <SettingsModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        username="John Doe"
-        userPlan="Pro Plan"
-      />
+      {isModalOpen && (
+        <SettingsModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          username={user?.username || 'Guest'}
+          userPlan="Free Plan"
+        />
+      )}
     </ChatLayoutContainer>
   );
 };
