@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { SettingsModalProps, ModalTab } from './types';
 import { createStyles } from './styles';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useUser } from '@/contexts/UserContext';
 import styled from 'styled-components';
 
 const styles = createStyles({
@@ -46,6 +47,18 @@ const ThemeToggleButton = styled.button`
   }
 `;
 
+const LogoutButton = styled(ThemeToggleButton)`
+  background-color: #FF6B35;
+  border-color: #F59E0B;
+  color: #FFFFFF;
+  margin-top: 20px;
+
+  &:hover {
+    background-color: #D97706;
+    border-color: #B45309;
+  }
+`;
+
 const SettingsModal: React.FC<SettingsModalProps> = ({
   isOpen,
   onClose,
@@ -55,6 +68,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<ModalTab>('Settings');
   const { theme, toggleTheme } = useTheme();
+  const { setUser } = useUser();
   const {
     ModalBackdrop,
     ModalContent,
@@ -74,6 +88,13 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
 
   const handleTabClick = (tab: ModalTab) => {
     setActiveTab(tab);
+  };
+
+  const handleLogout = () => {
+    console.log('Logging out...');
+    localStorage.removeItem('accessToken');
+    setUser(null);
+    window.location.href = '/login';
   };
 
   const renderContent = () => {
@@ -111,6 +132,9 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
           <>
             <ModalTitle>Log Out</ModalTitle>
             <p>Are you sure you want to log out?</p>
+            <LogoutButton onClick={handleLogout}>
+              Confirm Log Out
+            </LogoutButton>
           </>
         );
       default:
