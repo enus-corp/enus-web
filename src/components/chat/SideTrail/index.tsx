@@ -2,41 +2,57 @@ import React from 'react';
 import { SideTrailProps } from './types';
 import { createStyles } from './styles';
 
-const styles = createStyles({
-  width: 60,
-  backgroundColor: '#343A40',
-  iconSize: 32,
-  iconSpacing: 25
-});
+const { SideTrail: StyledSideTrail, TrailIcon, OpenDrawerButton, UserAvatar } = createStyles();
 
-const SideTrail: React.FC<SideTrailProps> = ({
+const SideTrailComponent: React.FC<SideTrailProps> = ({
   isSidebarOpen,
   onToggleSidebar,
   onOpenSettings,
   username,
-  avatarUrl
+  activeIcon,
+  onIconClick
 }) => {
-  const { SideTrailContainer, TrailIcon, OpenDrawerButton, UserAvatar } = styles;
+  const userInitials = username
+    .split(' ')
+    .map(word => word[0])
+    .join('')
+    .toUpperCase();
 
   return (
-    <SideTrailContainer>
-      <OpenDrawerButton onClick={onToggleSidebar}>
+    <StyledSideTrail>
+      {/* Open Drawer Button */}
+      <OpenDrawerButton
+        $isActive={false}
+        onClick={onToggleSidebar}
+        title={isSidebarOpen ? "Close Panel" : "Open Panel"}
+      >
         {isSidebarOpen ? '<' : '>'}
       </OpenDrawerButton>
 
-      <TrailIcon>Ic1</TrailIcon>
-      <TrailIcon className="active">Ic2</TrailIcon>
-      <TrailIcon>Ic3</TrailIcon>
+      {/* Chat Icon */}
+      <TrailIcon
+        $isActive={activeIcon === 'chat'}
+        onClick={() => onIconClick('chat')}
+        title="Chat"
+      >
+        💬
+      </TrailIcon>
 
-      <UserAvatar onClick={onOpenSettings}>
-        {avatarUrl ? (
-          <img src={avatarUrl} alt={username} />
-        ) : (
-          username.charAt(0).toUpperCase()
-        )}
+      {/* Configuration Icon */}
+      <TrailIcon
+        $isActive={activeIcon === 'config'}
+        onClick={() => onIconClick('config')}
+        title="Configuration"
+      >
+        ⚙️
+      </TrailIcon>
+
+      {/* User Avatar */}
+      <UserAvatar onClick={onOpenSettings} title="User Settings">
+        {userInitials}
       </UserAvatar>
-    </SideTrailContainer>
+    </StyledSideTrail>
   );
 };
 
-export default SideTrail; 
+export default SideTrailComponent; 

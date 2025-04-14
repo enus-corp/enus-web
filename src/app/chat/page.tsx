@@ -5,8 +5,8 @@ import styled from 'styled-components';
 import Sidebar from '@/components/chat/Sidebar';
 import SideTrail from '@/components/chat/SideTrail';
 import SettingsModal from '@/components/chat/SettingsModal';
-import ChatPanel from '@/components/chat/ChatArea';
-import { Message } from '@/components/chat/ChatArea/types';
+import ChatPanel from '@/components/chat/mainPanel/ChatArea';
+import { Message } from '@/components/chat/mainPanel/types';
 
 // --- Mock Data ---
 const mockChatHistory = [
@@ -40,6 +40,7 @@ const ChatPage: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>(mockMessages);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [activeIcon, setActiveIcon] = useState<'chat' | 'config' | null>('chat');
 
   const activeChat = mockChatHistory.find(chat => chat.id === currentChatId);
 
@@ -63,6 +64,15 @@ const ChatPage: React.FC = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
+  const handleIconClick = (icon: 'chat' | 'config') => {
+    setActiveIcon(icon);
+    // Config icon click will be handled by routing to a separate page
+    if (icon === 'config') {
+      // TODO: Add routing to config page
+      console.log('Navigate to config page');
+    }
+  };
+
   return (
     <ChatLayoutContainer>
       <SideTrail
@@ -70,6 +80,8 @@ const ChatPage: React.FC = () => {
         onToggleSidebar={toggleSidebar}
         onOpenSettings={() => setIsModalOpen(true)}
         username="John Doe"
+        activeIcon={activeIcon}
+        onIconClick={handleIconClick}
       />
 
       <Sidebar 
@@ -82,10 +94,18 @@ const ChatPage: React.FC = () => {
       />
       
       <ChatPanel
-        isSidebarOpen={isSidebarOpen}
-        title={activeChat ? activeChat.title : 'New Chat'}
         messages={messages}
+        title={activeChat ? activeChat.title : 'New Chat'}
         onSendMessage={handleSendMessage}
+        chatId='TEST'
+        isSidebarOpen={isSidebarOpen}
+        isConfigMode={activeIcon === 'config'}
+        config={{
+          readSpeed: 'normal',
+          detailLevel: 'basic',
+          briefingCount: 1
+        }}
+        onConfigChange={() => {}}
       />
 
       <SettingsModal

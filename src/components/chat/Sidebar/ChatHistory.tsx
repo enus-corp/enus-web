@@ -18,7 +18,7 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({
       {items.map((item) => (
         <ChatHistoryItem
           key={item.id}
-          isActive={item.id === activeChatId}
+          $isActive={item.id === activeChatId}
           onClick={() => onChatSelect(item.id)}
         >
           <div>{item.title}</div>

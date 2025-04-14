@@ -4,17 +4,16 @@ import { ChatLayoutStyles } from '../ChatLayout/types';
 export const createStyles = ({ drawerWidth, trailWidth }: ChatLayoutStyles) => ({
 
   Sidebar : styled.aside<{ isOpen: boolean }>`
-    width: ${drawerWidth}px;
+    width: 280px;
     background-color: #F8F9FA; /* Light grey background */
     border-right: 1px solid #E0E0E0; /* Subtle border */
     display: flex;
     flex-direction: column;
-    padding-top: 60px; /* Add explicit top padding */
-    padding-bottom: 20px;
+    padding: 60px 15px 20px;
 
     /* Drawer specific styles for PUSH behavior */
-    position: absolute; /* Position relative to ChatLayoutContainer */
-    left: ${trailWidth}px; /* Position it after the trail */
+    position: fixed;
+    left: 80px; /* Adjusted to match new side trail width */
     top: 0;
     height: 100%;
     z-index: 900; 
@@ -47,7 +46,7 @@ export const createStyles = ({ drawerWidth, trailWidth }: ChatLayoutStyles) => (
     border: none;
     color: #FFFFFF;
     padding: 12px 20px;
-    margin: 0 20px 20px 20px;
+    margin: 0 0 20px;
     border-radius: 8px;
     font-family: 'Poppins', sans-serif;
     font-size: 15px;
@@ -69,14 +68,14 @@ export const createStyles = ({ drawerWidth, trailWidth }: ChatLayoutStyles) => (
     flex-grow: 1;
   `,
 
-  ChatHistoryItem: styled.li<{ isActive: boolean }>`
-    padding: 12px 20px;
+  ChatHistoryItem: styled.li<{ $isActive: boolean }>`
+    padding: 12px 15px;
     font-family: 'Avenir', sans-serif;
     font-size: 14px;
     cursor: pointer;
     border-radius: 6px;
-    margin: 2px 10px;
-    background-color: ${props => props.isActive ? 'rgba(160, 217, 177, 0.2)' : 'transparent'};
+    margin: 2px 0;
+    background-color: ${props => props.$isActive ? 'rgba(160, 217, 177, 0.2)' : 'transparent'};
     color: #495057;
     white-space: nowrap;
     overflow: hidden;
@@ -104,24 +103,29 @@ export const createStyles = ({ drawerWidth, trailWidth }: ChatLayoutStyles) => (
   `,
 
   UserProfileArea: styled.div`
-    padding: 20px;
+    padding: 20px 15px;
     border-top: 1px solid #E0E0E0;
     display: flex;
-    align-items: center;
-    gap: 12px;
+    flex-direction: column;
+    gap: 10px;
   `,
 
   UserInfo: styled.div`
-    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
   `,
 
   Username: styled.div`
+    font-family: 'Avenir', sans-serif;
+    font-size: 16px;
     font-weight: 600;
     color: #252525;
   `,
 
   UserEmail: styled.div`
-    font-size: 12px;
+    font-family: 'Avenir', sans-serif;
+    font-size: 13px;
     color: #6C757D;
   `,
 
@@ -129,8 +133,12 @@ export const createStyles = ({ drawerWidth, trailWidth }: ChatLayoutStyles) => (
     background: none;
     border: none;
     color: #6C757D;
+    font-family: 'Avenir', sans-serif;
+    font-size: 14px;
     cursor: pointer;
-    padding: 5px;
+    padding: 5px 0;
+    text-align: left;
+    transition: color 0.2s;
 
     &:hover {
       color: #252525;

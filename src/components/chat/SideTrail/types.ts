@@ -3,6 +3,8 @@ export interface SideTrailProps {
   onToggleSidebar: () => void;
   onOpenSettings: () => void;
   username: string;
+  activeIcon: 'chat' | 'config' | null;
+  onIconClick: (icon: 'chat' | 'config') => void;
   avatarUrl?: string;
 }
 
