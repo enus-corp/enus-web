@@ -30,4 +30,28 @@ axiosInstance.interceptors.request.use(
   }
 );
 
+// Add a response interceptor
+axiosInstance.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  (error) => {
+    console.log(error.response.status)
+    if (typeof window !== 'undefined' && error.response && error.response.status === 401) {
+      console.log('Unauthorized access (401). Token might be expired. Redirecting to login.');
+      
+      // Remove the expired token
+      localStorage.removeItem('accessToken'); 
+      
+      // Redirect to login page
+      window.location.href = '/login'; 
+      
+      return new Promise(() => {});
+    }
+    
+    // For any other errors, just reject the promise
+    return Promise.reject(error);
+  }
+);
+
 export default axiosInstance; 
