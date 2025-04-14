@@ -212,22 +212,6 @@ const LandingPage: React.FC = () => {
           <FeatureRow>
             <FeatureItem>
               <FeatureIcon>
-                <IconWrapper>
-                  <Image
-                    src="/images/cloud-vector-1.svg"
-                    alt="Cloud icon"
-                    fill
-                    style={{ objectFit: 'contain' }}
-                  />
-                </IconWrapper>
-                <IconWrapper>
-                  <Image
-                    src="/images/cloud-vector-2.svg"
-                    alt="Cloud icon"
-                    fill
-                    style={{ objectFit: 'contain' }}
-                  />
-                </IconWrapper>
               </FeatureIcon>
               <FeatureTitle>Registered Users</FeatureTitle>
               <FeatureDescription>
@@ -237,47 +221,14 @@ const LandingPage: React.FC = () => {
 
             <FeatureItem>
               <FeatureIcon>
-                <IconWrapper>
-                  <Image
-                    src="/images/cloud-vector-3.svg"
-                    alt="Cloud icon"
-                    fill
-                    style={{ objectFit: 'contain' }}
-                  />
-                </IconWrapper>
-                <IconWrapper>
-                  <Image
-                    src="/images/cloud-vector-4.svg"
-                    alt="Cloud icon"
-                    fill
-                    style={{ objectFit: 'contain' }}
-                  />
-                </IconWrapper>
               </FeatureIcon>
               <FeatureTitle>Daily Users  </FeatureTitle>
               <FeatureDescription>
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit.
               </FeatureDescription>
             </FeatureItem>
-
             <FeatureItem>
               <FeatureIcon>
-                <IconWrapper>
-                  <Image
-                    src="/images/cloud-vector-5.svg"
-                    alt="Cloud icon"
-                    fill
-                    style={{ objectFit: 'contain' }}
-                  />
-                </IconWrapper>
-                <IconWrapper>
-                  <Image
-                    src="/images/cloud-vector-6.svg"
-                    alt="Cloud icon"
-                    fill
-                    style={{ objectFit: 'contain' }}
-                  />
-                </IconWrapper>
               </FeatureIcon>
               <FeatureTitle>Title 3</FeatureTitle>
               <FeatureDescription>
