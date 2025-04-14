@@ -42,9 +42,6 @@ const mockMessages: Message[] = [
   { id: 'msg4', sender: 'ai', text: 'The EU proposal focuses on risk-based categorization, with stricter rules for high-risk AI systems like those used in critical infrastructure or law enforcement. Key points include data quality requirements, human oversight mandates, and clear information for users interacting with AI systems.' },
 ];
 
-const drawerWidth = 280;
-const trailWidth = 60;
-
 // --- Styled Components ---
 const ChatLayoutContainer = styled.div`
   height: 100vh;
