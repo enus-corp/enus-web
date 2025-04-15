@@ -43,17 +43,14 @@ export const loginUser = async (credentials: SigninRequest): Promise<SigninRespo
     const response = await axiosInstance.post<GeneralServerResponse<SigninResponse>>('/api/auth/signin', credentials); // Updated endpoint
 
     // Check the 'error' flag
-    if (response.data.error || !response.data.data) {
-      console.error('Login API Error:', response.data.message);
+    if (response.data.error) {
       throw new Error(response.data.message || 'Login failed. Please check your credentials.');
     }
 
     // Login successful, return the token data
-    console.log('Login successful:', response.data.data);
-    return response.data.data; // Return the accessToken and refreshToken
+    return response.data.data!; // Return the accessToken and refreshToken
 
   } catch (error) {
-    console.error('Login Request Failed:', error);
     if (axios.isAxiosError(error)) {
       const backendMessage = error.response?.data?.message;
       throw new Error(backendMessage || 'An error occurred during login. Please try again.');
@@ -99,3 +96,9 @@ export const signupUser = async (userData: SignupRequest): Promise<SignupSuccess
   }
 };
 
+export const oauthLogin = (provider: string): void => {
+  // Get the base URL from the axios instance
+  const baseURL = axiosInstance.defaults.baseURL;
+  // Use window.location.href to redirect the user to the backend endpoint  
+  window.location.href = `${baseURL}/api/oauth/${provider.toLowerCase()}`;
+};
