@@ -6,6 +6,7 @@ import { UserProvider } from '@/contexts/UserContext';
 import { CustomThemeProvider } from '@/contexts/ThemeContext';
 import Header from '@/components/Header';
 import { lightTheme } from "@/theme/theme";
+import StyledComponentsRegistry from "@/lib/registry";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,16 +30,24 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <link
+          href="https://fonts.googleapis.com/css2?family=Avenir:wght@400;800&family=Poppins:wght@400&display=swap"
+          rel="stylesheet"
+        />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <CustomThemeProvider>
-          <GlobalStyle theme={lightTheme} />
-          <Header />
-          <UserProvider>
-            {children}
-          </UserProvider>
-        </CustomThemeProvider>
+        <StyledComponentsRegistry>
+          <CustomThemeProvider>
+            <GlobalStyle theme={lightTheme} />
+            {/* <Header /> */}
+            <UserProvider>
+              {children}
+            </UserProvider>
+          </CustomThemeProvider>
+        </StyledComponentsRegistry>
       </body>
     </html>
   );
