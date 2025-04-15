@@ -9,6 +9,7 @@ import ChatPanel from '@/components/chat/mainPanel/ChatArea';
 import { Message } from '@/components/chat/mainPanel/types';
 import { useUser } from '@/contexts/UserContext';
 import axiosInstance from '@/lib/axios';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 interface GeneralServerResponse<T> {
   error: boolean;
@@ -58,6 +59,8 @@ const ChatPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [activeIcon, setActiveIcon] = useState<'chat' | 'config' | null>('chat');
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
   const activeChat = mockChatHistory.find(chat => chat.id === currentChatId);
 
@@ -81,6 +84,45 @@ const ChatPage: React.FC = () => {
 
     fetchUserData();
   }, [setUser]);
+
+  useEffect(() => {
+    // Check if we're coming from OAuth redirect
+    const accessToken = searchParams.get('accessToken');
+    const refreshToken = searchParams.get('refreshToken');
+
+    // If we have tokens in URL params, store them
+    if (accessToken && refreshToken) {
+      localStorage.setItem('accessToken', accessToken);
+      localStorage.setItem('refreshToken', refreshToken);
+      
+      // Clean up URL
+      router.replace('/chat');
+    }
+    
+    // Check if we have tokens in cookies
+    const getCookie = (name: string) => {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop()?.split(';').shift();
+    };
+
+    const accessTokenFromCookie = getCookie('accessToken');
+    const refreshTokenFromCookie = getCookie('refreshToken');
+
+    if (accessTokenFromCookie && refreshTokenFromCookie) {
+      localStorage.setItem('accessToken', accessTokenFromCookie);
+      localStorage.setItem('refreshToken', refreshTokenFromCookie);
+      
+      // Clear cookies after storing in localStorage
+      document.cookie = 'accessToken=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+      document.cookie = 'refreshToken=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+    }
+
+    // If no tokens available at all, redirect to login
+    if (!localStorage.getItem('accessToken')) {
+      router.replace('/login');
+    }
+  }, [router, searchParams]);
 
   const handleSendMessage = (message: string) => {
     const userMessage = {
