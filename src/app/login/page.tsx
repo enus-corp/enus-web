@@ -5,7 +5,7 @@ import styled, { keyframes } from 'styled-components';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { loginUser } from '../../services/auth';
+import { loginUser, oauthLogin } from '../../services/auth';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 
@@ -29,7 +29,7 @@ const LeftPanel = styled.div`
 
 const LoginForm = styled.form`
   width: 100%;
-  max-width: 400px;
+  max-width: 450px;
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -173,13 +173,13 @@ const SignUpLink = styled.div`
 `;
 
 // --- Snackbar Styles ---
-const Snackbar = styled.div<{ $isVisible: boolean; isError?: boolean }>`
+const Snackbar = styled.div<{ $isVisible: boolean; $isError?: boolean }>`
   position: fixed;
   bottom: 30px;
   left: 50%;
   transform: translateX(-50%) translateY(${props => props.$isVisible ? '0' : '100px'});
-  background-color: ${props => props.isError ? '#F8D7DA' : '#D1E7DD'}; /* Success is default green */
-  color: ${props => props.isError ? '#721C24' : '#0F5132'};
+  background-color: ${props => props.$isError ? '#F8D7DA' : '#D1E7DD'}; /* Success is default green */
+  color: ${props => props.$isError ? '#721C24' : '#0F5132'};
   padding: 12px 25px;
   border-radius: 8px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
@@ -256,7 +256,7 @@ const AnimatedShape3 = styled(AnimatedShape)`
 
 // --- Login Page Component ---
 
-const LoginPage: React.FC = () => {
+const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -269,11 +269,11 @@ const LoginPage: React.FC = () => {
   });
   const router = useRouter();
 
-  const showSnackbar = (message: string) => {
-    setSnackbar({ message, isVisible: true, isError: false });
+  const showSnackbar = (message: string, isError: boolean = false) => {
+    setSnackbar({ message, isVisible: true, isError });
     setTimeout(() => {
-      setSnackbar(prev => ({ ...prev, isVisible: false })); 
-    }, 4000); 
+      setSnackbar(prev => ({ ...prev, isVisible: false }));
+    }, 4000);
   };
 
   const togglePasswordVisibility = () => {
@@ -282,55 +282,62 @@ const LoginPage: React.FC = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    setError(null);
 
+    if (!email || !password) {
+      showSnackbar('Please enter both email and password', true);
+      return;
+    }
+
+    setIsLoading(true);
     try {
       const tokenData = await loginUser({ email, password });
-      console.log("Login successful, tokens:", tokenData);
       
       if (typeof window !== 'undefined') {
         localStorage.setItem('accessToken', tokenData.accessToken);
         localStorage.setItem('refreshToken', tokenData.refreshToken);
       }
       
-      showSnackbar('Login Successful! Redirecting...');
+      showSnackbar('Login Successful! Redirecting...', false);
 
       setTimeout(() => {
         router.push('/chat');
       }, 1500);
 
     } catch (err: unknown) {
-      console.error("Login error:", err);
       if (err instanceof Error) {
-        setError(err.message || 'Login failed. Please try again.');
+        showSnackbar(err.message || 'Login failed. Please try again.', true);
       } else {
-        setError('An unknown error occurred during login.');
+        showSnackbar('An unknown error occurred during login.', true);
       }
+    } finally {
       setIsLoading(false);
     }
   };
 
   const handleOAuth = (provider: string) => {
-    console.log(`OAuth login attempt with: ${provider}`);
-    alert(`${provider} login not implemented yet.`);
+    console.log(`Initiating OAuth login with: ${provider}`);
+    oauthLogin(provider);
   };
 
   return (
     <LoginPageContainer>
       <LeftPanel>
+        {/* Login Form */}
         <LoginForm onSubmit={handleLogin}>
           <Title>Welcome Back</Title>
           {error && <p style={{ color: 'red', textAlign: 'center' }}>{error}</p>}
+
+          {/* Email input */}
           <InputField
             type="email"
             placeholder="Email Address"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            autoComplete="email"
             disabled={isLoading}
           />
+
+          {/* Password input */}
           <InputWrapper>
             <InputField
               type={isPasswordVisible ? "text" : "password"}
@@ -350,21 +357,40 @@ const LoginPage: React.FC = () => {
               <FontAwesomeIcon icon={isPasswordVisible ? faEyeSlash : faEye} size="lg" />
             </PasswordToggleButton>
           </InputWrapper>
+          
+          {/* Submit button */}
           <SubmitButton type="submit" disabled={isLoading}>
             {isLoading ? 'Logging in...' : 'Log In'}
           </SubmitButton>
+
           <Divider>or continue with</Divider>
+
+          {/* OAuth login */}
           <OAuthContainer>
-            <OAuthButton type="button" onClick={() => handleOAuth('Google')} aria-label="Login with Google">
+            <OAuthButton 
+              type="button" 
+              onClick={() => handleOAuth('google')} 
+              aria-label="Login with Google"
+            >
               <Image src="/icons/google.svg" alt="Google Login" width={28} height={28} />
             </OAuthButton>
-            <OAuthButton type="button" onClick={() => handleOAuth('Kakao')} aria-label="Login with Kakao">
+            <OAuthButton 
+              type="button" 
+              onClick={() => handleOAuth('kakao')} 
+              aria-label="Login with Kakao"
+            >
               <Image src="/icons/kakao.svg" alt="Kakao Login" width={28} height={28} />
             </OAuthButton>
-            <OAuthButton type="button" onClick={() => handleOAuth('Naver')} aria-label="Login with Naver">
+            <OAuthButton 
+              type="button" 
+              onClick={() => handleOAuth('naver')} 
+              aria-label="Login with Naver"
+            >
               <Image src="/icons/naver.svg" alt="Naver Login" width={28} height={28} />
             </OAuthButton>
           </OAuthContainer>
+
+          {/* Signup link */}
           <SignUpLink>
             Don&apos;t have an account? <Link href="/signup">Sign Up</Link>
           </SignUpLink>
@@ -376,7 +402,7 @@ const LoginPage: React.FC = () => {
         <AnimatedShape3 />
       </RightPanel>
 
-      <Snackbar $isVisible={snackbar.isVisible} isError={snackbar.isError}>
+      <Snackbar $isVisible={snackbar.isVisible} $isError={snackbar.isError}>
         {snackbar.message}
       </Snackbar>
     </LoginPageContainer>
