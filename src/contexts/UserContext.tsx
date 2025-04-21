@@ -1,16 +1,7 @@
 'use client'
 
+import { UserDTO } from '@/types/user';
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-
-interface UserDTO {
-  userId: number;
-  firstName: string;
-  lastName: string;
-  username: string;
-  email: string;
-  gender: 'MALE' | 'FEMALE' | 'OTHER';
-  isOauthUser: boolean;
-}
 
 interface UserContextType {
   user: UserDTO | null;
