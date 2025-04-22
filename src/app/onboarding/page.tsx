@@ -2,17 +2,15 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import axiosInstance from '@/lib/axios';
-import { UserDTO } from '@/types/user';
-import { GeneralServerResponse } from '@/types/serverResponse';
 import { OnboardingContainer, Form, Title, FormGroup, Label, Input, Select, Button, Snackbar } from './styles';
+import { self, update } from '@/services/user';
 
 interface UserFormData {
     firstName: string;
     lastName: string;
     username: string;
     email: string;
-    gender: string;
+    gender: 'male' | 'female' | 'other';
     age: number;
 }
 
@@ -46,51 +44,30 @@ export default function OnboardingPage() {
         e.preventDefault();
         console.log(formData);
         try {
-            const response = await axiosInstance.put<GeneralServerResponse<null>>("/api/user/update", {
-                firstName: formData.firstName,
-                lastName: formData.lastName,
-                username: formData.username,
-                age: formData.age,
-                gender: formData.gender,
-            });
-            if (response.data) {
-                if (!response.data.error) {
-                    showSnackbar("Profile updated successfully! Redirecting to chat...", false);
-                    setTimeout(() => router.push('/chat'), 2000);
-                } else {
-                    showSnackbar("Error updating profile. " + response.data.message, true);
-                }
-            } else {
-                showSnackbar("Error updating profile. Please try again.", true);
-            }
+            await update(formData)
+            setTimeout(() => router.push('/chat'), 2000);
+            showSnackbar("Profile updated successfully! Redirecting to chat...", false);
         } catch (error) {
             console.error("Error during user update: ", error);
+            showSnackbar("Error updating profile. Please try again.", true);
         }
     }
 
     useEffect(() => {
         const getUser = async () => {
             try {
-                const response = await axiosInstance.get<GeneralServerResponse<UserDTO>>('/api/user/self');
-                if (response.data) {
-                    const user = response.data.data!;
-                    console.log(user)
-
-                    setFormData({
-                        firstName: user.firstName,
-                        lastName: user.lastName,
-                        username: user.username,
-                        email: user.email,
-                        gender: user.gender === null ? 'male' : user.gender,
-                        age: user.age,
-                    })
-
-                } else {
-                    showSnackbar("Error fetching user from server", true);
-                }
+                const user = await self();
+                setFormData({
+                    firstName: user.firstName,
+                    lastName: user.lastName,
+                    username: user.username,
+                    email: user.email,
+                    gender: user.gender === null ? 'male' : user.gender,
+                    age: user.age,
+                })
             } catch (error) {
                 console.error("Error during user fetch: ", error);
-
+                showSnackbar("Error fetching user from server", true);
             }
         }
 

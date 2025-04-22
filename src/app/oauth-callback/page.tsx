@@ -2,15 +2,10 @@
 
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import axios from 'axios'; // Keep axios import for isAxiosError
-// import { AxiosError } from 'axios'; // Remove unused import
-import axiosInstance from '@/lib/axios';
 import { useUser } from '@/contexts/UserContext';
 import styled from 'styled-components';
-import { Token } from '@/types/token'; // Use Token, remove TokenResponse
-import { GeneralServerResponse } from '@/types/serverResponse'; // Import the response type
 import { UserDTO } from '@/types/user';
-
+import { exchangeToken as exchange } from '@/services/auth';
 // Basic styled component for feedback
 const CallbackContainer = styled.div`
     display: flex;
@@ -57,59 +52,23 @@ export default function OAuthCallbackPage() {
 
         const exchangeToken = async () => {
             try {
-                console.log('Exchanging temporary token...');
-                console.log("temp token -> ", tempToken);
+                const response = await exchange({tempToken: tempToken});
+                const { token, user } = response;
+                localStorage.setItem('accessToken', token.accessToken);
+                localStorage.setItem('refreshToken', token.refreshToken);
 
-                // Correctly type the expected response
-                const response = await axiosInstance.post<GeneralServerResponse<{token: Token, user: UserDTO}|null>>(
-                    '/api/oauth/exchange-token',
-                    { tempToken: tempToken }
-                );
-
-                console.log('response -> ', response);
-
-                if (response.data) {
-                    if (!response.data.error) {
-                        // SUCCESS CASE
-                        const { accessToken, refreshToken } = response.data.data!.token;
-                        console.log('Tokens received successfully.');
-        
-                        localStorage.setItem('accessToken', accessToken);
-                        localStorage.setItem('refreshToken', refreshToken);
-
-                        const infoRequired = needsAdditionalInfo(response.data.data!.user);
-                        if (infoRequired) {
-                            router.push('/onboarding')
-                        } else {
-                            setMessage('Authentication successful! Redirecting...');
-                            router.push('/chat'); // Redirect on success
-                        }
-                    } else {
-                        // ERROR CASE
-                        const errorMessage = response.data.message || 'Token exchange failed (unknown reason).';
-                        console.error('Token exchange failed:', errorMessage);
-                        setError(`Authentication failed: ${errorMessage}. Redirecting to login...`);
-                        localStorage.removeItem('accessToken');
-                        localStorage.removeItem('refreshToken');
-                        setTimeout(() => router.push('/login'), 3000);
-                    }
+                const infoRequired = needsAdditionalInfo(user);
+                if (infoRequired) {
+                    setUser(user);
+                    router.push("/onboarding");
                 } else {
-                    throw new Error('Invalid response structure from server.');
+                    setMessage("Authentication successful! Redirecting...");
+                    setTimeout(() => router.push('/chat'), 2000);
                 }
             } catch (err) {
                 console.error('Error during token exchange:', err);
-                let errorMessage = 'An unexpected error occurred during authentication.';
-
-                if (axios.isAxiosError(err) && err.response) {
-                    const errorData = err.response.data as GeneralServerResponse<null>;
-                    if (errorData && errorData.message) {
-                        errorMessage = errorData.message;
-                    }
-                } else if (err instanceof Error) {
-                    errorMessage = err.message;
-                }
-
-                setError(`Authentication error: ${errorMessage}. Redirecting to login...`);
+                // ERROR CASE
+                console.error('Token exchange failed. Redirecting to login...');
                 localStorage.removeItem('accessToken');
                 localStorage.removeItem('refreshToken');
                 setTimeout(() => router.push('/login'), 3000);

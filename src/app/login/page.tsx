@@ -8,6 +8,7 @@ import { loginUser, oauthLogin } from '../../services/auth';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import { LoginPageContainer, LeftPanel, LoginForm, Title, InputField, InputWrapper, PasswordToggleButton, SubmitButton, Divider, OAuthContainer, OAuthButton, SignUpLink, RightPanel, AnimatedShape1, AnimatedShape2, AnimatedShape3, Snackbar } from './styles';
+import { SigninResponse } from '@/types/response/signinResponse';
 
 
 // --- Login Page Component ---
@@ -46,11 +47,12 @@ const LoginPage = () => {
 
     setIsLoading(true);
     try {
-      const tokenData = await loginUser({ email, password });
+      const tokenData : SigninResponse = await loginUser({ email, password });
+      const { accessToken, refreshToken } = tokenData;
       
       if (typeof window !== 'undefined') {
-        localStorage.setItem('accessToken', tokenData.accessToken);
-        localStorage.setItem('refreshToken', tokenData.refreshToken);
+        localStorage.setItem('accessToken', accessToken);
+        localStorage.setItem('refreshToken', refreshToken);
       }
       
       showSnackbar('Login Successful! Redirecting...', false);

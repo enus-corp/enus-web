@@ -59,14 +59,9 @@ const SignupPage: React.FC = () => {
     }
 
     try {
-      const response = await signupUser({
-        ...formData,
-        age: ageNumber
-      });
-      showSnackbar((response as { message: string }).message || 'Signup successful! Redirecting...');
-      setTimeout(() => {
-        router.push('/login');
-      }, 2000);
+      await signupUser({...formData, age: ageNumber});
+      showSnackbar('Signup successful! Redirecting...');
+      setTimeout(() => { router.push('/login') }, 2000);
 
     } catch (err: unknown) {
       console.error("Signup error:", err);
