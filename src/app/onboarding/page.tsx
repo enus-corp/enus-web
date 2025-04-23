@@ -45,7 +45,7 @@ export default function OnboardingPage() {
         console.log(formData);
         try {
             await update(formData)
-            setTimeout(() => router.push('/chat'), 2000);
+            setTimeout(() => router.replace('/chat'), 2000);
             showSnackbar("Profile updated successfully! Redirecting to chat...", false);
         } catch (error) {
             console.error("Error during user update: ", error);
