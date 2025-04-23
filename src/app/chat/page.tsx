@@ -8,28 +8,21 @@ import SettingsModal from '@/components/chat/SettingsModal';
 import ChatPanel from '@/components/chat/mainPanel/ChatArea';
 import { Message } from '@/components/chat/mainPanel/types';
 import { useUser } from '@/contexts/UserContext';
-import axiosInstance from '@/lib/axios';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { createNewChatTitle } from '@/utils/date';
+import { websocketService } from '@/services/websocket';
+import { self } from '@/services/user';
+import { isTokenExpired } from '@/utils/jwt';
 
-interface GeneralServerResponse<T> {
-  error: boolean;
-  message: string;
-  code: number;
-  data: T | null;
-}
 
-interface UserDTO {
-  userId: number;
-  firstName: string;
-  lastName: string;
-  username: string;
-  email: string;
-  gender: 'MALE' | 'FEMALE' | 'OTHER';
-  isOauthUser: boolean;
+interface ChatHistoryItem {
+  id: string;
+  title: string;
+  lastMessage: string;
 }
 
 // --- Mock Data ---
-const mockChatHistory = [
+const mockChatHistory: ChatHistoryItem[] = [
   { id: 'chat1', title: 'Summary of Tech News Today', lastMessage: 'AI advancements dominate headlines...' },
   { id: 'chat2', title: 'Questions about Market Trends', lastMessage: 'Can you explain the recent dip?' },
   { id: 'chat3', title: 'Follow-up on Renewable Energy', lastMessage: 'Sources mentioned solar power increase...' },
@@ -54,6 +47,7 @@ const ChatLayoutContainer = styled.div`
 // --- Chat Page Component ---
 const ChatPage: React.FC = () => {
   const { user, setUser } = useUser();
+  const [chatHistory, setChatHistory] = useState<ChatHistoryItem[]>(mockChatHistory);
   const [currentChatId, setCurrentChatId] = useState<string | null>(mockChatHistory[0]?.id || null);
   const [messages, setMessages] = useState<Message[]>(mockMessages);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -62,82 +56,83 @@ const ChatPage: React.FC = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const activeChat = mockChatHistory.find(chat => chat.id === currentChatId);
+  const activeChat = chatHistory.find(chat => chat.id === currentChatId);
 
+  // Fetch user data on mount
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const { data: response } = await axiosInstance.get<GeneralServerResponse<UserDTO>>('/api/user/self', {
-          withCredentials: true
-        });
-        
-        if (!response.error && response.data) {
-          console.log(response.data)
-          setUser(response.data);
-        } else {
-          console.error('Error fetching user data:', response.message);
-        }
+        const user = await self();
+        setUser(user);
       } catch (error) {
         console.error('Failed to fetch user data:', error);
+        router.replace('/login');
       }
     };
 
-    fetchUserData();
-  }, [setUser]);
+    fetchUserData(); 
+  }, [router, setUser]);
 
   useEffect(() => {
-    // Check if we're coming from OAuth redirect
-    const accessToken = searchParams.get('accessToken');
-    const refreshToken = searchParams.get('refreshToken');
+    // get token
+    const token = localStorage.getItem('accessToken');
 
-    // If we have tokens in URL params, store them
-    if (accessToken && refreshToken) {
-      localStorage.setItem('accessToken', accessToken);
-      localStorage.setItem('refreshToken', refreshToken);
-      
-      // Clean up URL
-      router.replace('/chat');
-    }
-    
-    // Check if we have tokens in cookies
-    const getCookie = (name: string) => {
-      const value = `; ${document.cookie}`;
-      const parts = value.split(`; ${name}=`);
-      if (parts.length === 2) return parts.pop()?.split(';').shift();
-    };
-
-    const accessTokenFromCookie = getCookie('accessToken');
-    const refreshTokenFromCookie = getCookie('refreshToken');
-
-    if (accessTokenFromCookie && refreshTokenFromCookie) {
-      localStorage.setItem('accessToken', accessTokenFromCookie);
-      localStorage.setItem('refreshToken', refreshTokenFromCookie);
-      
-      // Clear cookies after storing in localStorage
-      document.cookie = 'accessToken=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-      document.cookie = 'refreshToken=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-    }
-
-    // If no tokens available at all, redirect to login
-    if (!localStorage.getItem('accessToken')) {
+    // check token exists in local storage. If not, redirect to login
+    if (!token || isTokenExpired(token)) {
       router.replace('/login');
     }
   }, [router, searchParams]);
 
-  const handleSendMessage = (message: string) => {
-    const userMessage = {
-      id: `msg${Date.now()}`,
-      sender: 'user' as const,
-      text: message,
-    };
+  useEffect(() => {
+    // Connect to WebSocket when component mounts
+    websocketService.connect();
 
-    const aiResponse = {
-      id: `msg${Date.now() + 1}`,
-      sender: 'ai' as const,
-      text: `Okay, processing your request about: "${message}". (This is a placeholder response.)`,
+    // Cleanup on unmount
+    return () => {
+      websocketService.disconnect();
     };
+  }, []);
 
-    setMessages([...messages, userMessage, aiResponse]);
+  const handleNewChat = async () => {
+    try {
+      // Request new chat ID from server
+      const chatId = await websocketService.requestNewChat();
+      const newChatTitle = createNewChatTitle();
+      
+      // Create new chat
+      const newChat: ChatHistoryItem = {
+        id: chatId,
+        title: newChatTitle,
+        lastMessage: '새로운 대화를 시작합니다.'
+      };
+      
+      // Update chat history and set as current chat
+      setChatHistory(prev => [newChat, ...prev]);
+      setCurrentChatId(chatId);
+      setMessages([]); // Clear messages for new chat
+    } catch (error) {
+      console.error('Failed to create new chat:', error);
+      // Handle error (show error message to user)
+    }
+  };
+
+  const handleSendMessage = async (message: string) => {
+    try {
+      // Send message through WebSocket
+      websocketService.sendMessage(message);
+
+      // Add message to local state
+      const userMessage: Message = {
+        id: `msg${Date.now()}`,
+        sender: 'user',
+        text: message,
+      };
+
+      setMessages(prev => [...prev, userMessage]);
+    } catch (error) {
+      console.error('Failed to send message:', error);
+      // Handle error (show error message to user)
+    }
   };
 
   const toggleSidebar = () => {
@@ -167,10 +162,10 @@ const ChatPage: React.FC = () => {
       <Sidebar 
         isOpen={isSidebarOpen}
         onClose={toggleSidebar}
-        chatHistory={mockChatHistory} 
+        chatHistory={chatHistory} 
         activeChatId={currentChatId} 
         onChatSelect={(newChatId) => setCurrentChatId(newChatId)} 
-        onNewChat={() => {}} 
+        onNewChat={handleNewChat} 
       />
       
       <ChatPanel
