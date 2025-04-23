@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import styled from 'styled-components';
 import { createStyles } from './styles';
 import { Message, ChatConfig } from '../types';
 import ConfigPanel from '../TtsConfig';

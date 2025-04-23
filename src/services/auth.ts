@@ -3,9 +3,10 @@ import axiosInstance from '../lib/axios';
 import axios from 'axios'; 
 import { SignupRequest } from '@/types/request/signupRequest';
 import { SigninResponse } from '@/types/response/signinResponse';
-import { publicApi } from './api';
+import { protectedApi, publicApi } from './api';
 import { Token } from '@/types/token';
 import { UserDTO } from '@/types/user';
+import { RefreshTokenRequest } from '@/types/request/refreshTokenRequest';
 
 export const loginUser = async (credentials: SigninRequest): Promise<SigninResponse> => {
   /**
@@ -105,4 +106,31 @@ export const oauthLogin = (provider: string): void => {
    */
   const baseURL = axiosInstance.defaults.baseURL;
   window.location.href = `${baseURL}/api/oauth/${provider.toLowerCase()}`;
+};
+
+export const refreshToken = async (refreshToken: RefreshTokenRequest): Promise<Token> => {
+  /**
+   * Refresh access token
+   */
+  try {
+    const response = await protectedApi.refreshToken(refreshToken);
+
+    if (response.data) {
+      if (!response.data.error) {
+        return response.data.data!;
+      } else {
+        throw new Error(response.data.message || 'Failed to refresh token');
+      }
+    }
+    throw new Error("error occured during exchange token");
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const backendMessage = error.response?.data?.message;
+      throw new Error(backendMessage || 'An error occurred during token refresh');
+    } else if (error instanceof Error) {
+      throw error;
+    } else {
+      throw new Error('An unknown error occurred during token refresh');
+    }
+  }
 };

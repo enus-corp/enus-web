@@ -2,9 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import GlobalStyle from '../styles/global';
-import { UserProvider } from '@/contexts/UserContext';
 import { CustomThemeProvider } from '@/contexts/ThemeContext';
-import Header from '@/components/Header';
 import { lightTheme } from "@/theme/theme";
 import StyledComponentsRegistry from "@/lib/registry";
 
@@ -36,16 +34,12 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <StyledComponentsRegistry>
           <CustomThemeProvider>
             <GlobalStyle theme={lightTheme} />
             {/* <Header /> */}
-            <UserProvider>
-              {children}
-            </UserProvider>
+            {children}
           </CustomThemeProvider>
         </StyledComponentsRegistry>
       </body>

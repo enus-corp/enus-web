@@ -6,6 +6,7 @@ import { SigninResponse } from "@/types/response/signinResponse";
 import { GeneralServerResponse } from "@/types/response/serverResponse";
 import { UserDTO } from "@/types/user";
 import { Token } from "@/types/token";
+import { RefreshTokenRequest } from "@/types/request/refreshTokenRequest";
 
 // api without authentication
 export const publicApi = {
@@ -18,4 +19,5 @@ export const publicApi = {
 export const protectedApi = {
     self: () => axiosInstance.get<GeneralServerResponse<UserDTO>>("/api/user/self"),
     update: (userDate: UpdateUserRequest) => axiosInstance.put<GeneralServerResponse<null>>("/api/user/update", userDate),
+    refreshToken: (refreshToken: RefreshTokenRequest) => axiosInstance.post<GeneralServerResponse<Token>>("/api/auth/refresh", refreshToken),
 }

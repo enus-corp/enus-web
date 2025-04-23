@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { loginUser, oauthLogin } from '../../services/auth';
+import { loginUser, oauthLogin } from '../../../services/auth';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import { LoginPageContainer, LeftPanel, LoginForm, Title, InputField, InputWrapper, PasswordToggleButton, SubmitButton, Divider, OAuthContainer, OAuthButton, SignUpLink, RightPanel, AnimatedShape1, AnimatedShape2, AnimatedShape3, Snackbar } from './styles';
