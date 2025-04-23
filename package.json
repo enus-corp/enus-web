@@ -12,12 +12,15 @@
     "@fortawesome/fontawesome-svg-core": "^6.7.2",
     "@fortawesome/free-solid-svg-icons": "^6.7.2",
     "@fortawesome/react-fontawesome": "^0.2.2",
+    "@stomp/stompjs": "^7.1.1",
+    "@types/sockjs-client": "^1.5.4",
     "@types/styled-components": "^5.1.34",
     "axios": "^1.8.4",
     "framer-motion": "^12.6.5",
     "next": "15.3.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "sockjs-client": "^1.6.1",
     "styled-components": "^6.1.17"
   },
   "devDependencies": {
