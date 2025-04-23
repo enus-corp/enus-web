@@ -53,6 +53,7 @@ export default function OAuthCallbackPage() {
         const exchangeToken = async () => {
             try {
                 const response = await exchange({tempToken: tempToken});
+                console.log('response -> ', response);
                 const { token, user } = response;
                 localStorage.setItem('accessToken', token.accessToken);
                 localStorage.setItem('refreshToken', token.refreshToken);
@@ -63,7 +64,7 @@ export default function OAuthCallbackPage() {
                     router.push("/onboarding");
                 } else {
                     setMessage("Authentication successful! Redirecting...");
-                    setTimeout(() => router.push('/chat'), 2000);
+                    setTimeout(() => router.replace('/chat'), 2000);
                 }
             } catch (err) {
                 console.error('Error during token exchange:', err);
