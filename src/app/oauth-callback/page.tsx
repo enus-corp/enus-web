@@ -61,7 +61,7 @@ export default function OAuthCallbackPage() {
                 const infoRequired = needsAdditionalInfo(user);
                 if (infoRequired) {
                     setUser(user);
-                    router.push("/onboarding");
+                    router.replace("/onboarding");
                 } else {
                     setMessage("Authentication successful! Redirecting...");
                     setTimeout(() => router.replace('/chat'), 2000);
@@ -72,7 +72,7 @@ export default function OAuthCallbackPage() {
                 console.error('Token exchange failed. Redirecting to login...');
                 localStorage.removeItem('accessToken');
                 localStorage.removeItem('refreshToken');
-                setTimeout(() => router.push('/login'), 3000);
+                setTimeout(() => router.replace('/login'), 3000);
             }
         };
 
