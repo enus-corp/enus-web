@@ -54,7 +54,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const refreshTokenValue = localStorage.getItem('refreshToken');
 
       if (!accessToken || !refreshTokenValue) {
-        logout();
         return;
       }
 
