@@ -10,7 +10,7 @@ const styles = createStyles({
 const NewChatButton: React.FC<NewChatButtonProps> = ({ onClick }) => {
   return (
     <styles.NewChatButton onClick={onClick}>
-      New Chat
+      오늘의 브리핑 듣기
     </styles.NewChatButton>
   );
 };
