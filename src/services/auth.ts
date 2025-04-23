@@ -8,6 +8,9 @@ import { Token } from '@/types/token';
 import { UserDTO } from '@/types/user';
 
 export const loginUser = async (credentials: SigninRequest): Promise<SigninResponse> => {
+  /**
+   * Login a user
+   */
   try {
     const response = await publicApi.signin(credentials);
 
@@ -36,6 +39,9 @@ export const loginUser = async (credentials: SigninRequest): Promise<SigninRespo
 };
 
 export const signupUser = async (userData: SignupRequest): Promise<void> => {
+  /**
+   * Sign up a new user
+   */
   try {
     const response = await publicApi.signup(userData);
     if (response.data) {
@@ -63,10 +69,20 @@ export const signupUser = async (userData: SignupRequest): Promise<void> => {
 };
 
 export const exchangeToken = async (tempToken: {tempToken: string}): Promise<{token: Token, user: UserDTO}> => {
+  /**
+   * Exchange temporary token for access and refresh tokens
+   * Save tokens to local storage
+   * Return token and user data
+   */
   try {
     const response = await publicApi.exchangeToken(tempToken);
     if (response.data) {
       if (!response.data.error) {
+        const { token } = response.data.data!;
+        // save tokens to local storage
+        localStorage.setItem('accessToken', token.accessToken);
+        localStorage.setItem('refreshToken', token.refreshToken);
+
         return response.data.data!;
       } else {
         throw new Error(response.data.message || "error occured during exchange token");
@@ -84,6 +100,9 @@ export const exchangeToken = async (tempToken: {tempToken: string}): Promise<{to
 }
 
 export const oauthLogin = (provider: string): void => {
+  /**
+   * Redirect to OAuth provider
+   */
   const baseURL = axiosInstance.defaults.baseURL;
   window.location.href = `${baseURL}/api/oauth/${provider.toLowerCase()}`;
 };
