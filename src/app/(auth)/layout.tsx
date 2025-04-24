@@ -1,8 +1,8 @@
 'use client';
 
+import { appStore } from '@/store/appStore';
 import React from 'react';
-import { UserProvider } from '@/contexts/UserContext';
-import { AuthProvider } from '@/contexts/AuthContext';
+import { Provider } from 'react-redux';
 
 export default function AuthLayout({
   children,
@@ -10,10 +10,8 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <AuthProvider>
-        <UserProvider>
-        {children}
-        </UserProvider>
-    </AuthProvider>
+    <Provider store={appStore}>
+      {children}
+    </Provider>
   );
 } 

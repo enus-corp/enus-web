@@ -2,10 +2,12 @@
 
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { useUser } from '@/contexts/UserContext';
 import styled from 'styled-components';
 import { UserDTO } from '@/types/user';
 import { exchangeToken as exchange } from '@/services/auth';
+import { useAppDispatch } from '@/hooks/useAppDispatch';
+import { setUser } from '@/store/slices/userSlice';
+
 // Basic styled component for feedback
 const CallbackContainer = styled.div`
     display: flex;
@@ -25,15 +27,17 @@ const Message = styled.p`
 export default function OAuthCallbackPage() {
     const searchParams = useSearchParams();
     const router = useRouter();
-    const { setUser } = useUser();
+    const dispatch = useAppDispatch();
 
     const [message, setMessage] = useState('Processing authentication...');
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         const tempToken = searchParams.get('tempToken');
+        console.log('OAuth Callback - Received tempToken:', tempToken ? 'Present' : 'Missing');
 
         if (!tempToken) {
+            console.error('OAuth Callback - No tempToken found in URL parameters');
             setError('Temporary token not found. Redirecting to login...');
             setTimeout(() => router.push('/login'), 3000);
             return;
@@ -52,24 +56,29 @@ export default function OAuthCallbackPage() {
 
         const exchangeToken = async () => {
             try {
+                console.log('OAuth Callback - Attempting token exchange...');
                 const response = await exchange({tempToken: tempToken});
-                console.log('response -> ', response);
+                console.log('OAuth Callback - Token exchange successful:', response);
+                
                 const { token, user } = response;
                 localStorage.setItem('accessToken', token.accessToken);
                 localStorage.setItem('refreshToken', token.refreshToken);
 
                 const infoRequired = needsAdditionalInfo(user);
+                console.log('OAuth Callback - User info required:', infoRequired);
+                
                 if (infoRequired) {
-                    setUser(user);
+                    dispatch(setUser(user));
                     router.replace("/onboarding");
                 } else {
                     setMessage("Authentication successful! Redirecting...");
                     setTimeout(() => router.replace('/chat'), 2000);
                 }
             } catch (err) {
-                console.error('Error during token exchange:', err);
-                // ERROR CASE
-                console.error('Token exchange failed. Redirecting to login...');
+                console.error('OAuth Callback - Token exchange failed:', err);
+                if (err instanceof Error) {
+                    console.error('OAuth Callback - Error details:', err.message);
+                }
                 localStorage.removeItem('accessToken');
                 localStorage.removeItem('refreshToken');
                 setTimeout(() => router.replace('/login'), 3000);
@@ -78,7 +87,7 @@ export default function OAuthCallbackPage() {
 
         exchangeToken();
 
-    }, [searchParams, router, setUser]);
+    }, [searchParams, router, dispatch]);
 
     return (
         <CallbackContainer>

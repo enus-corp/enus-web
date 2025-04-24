@@ -1,40 +1,24 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import Sidebar from '@/components/chat/Sidebar';
 import SideTrail from '@/components/chat/SideTrail';
 import SettingsModal from '@/components/chat/SettingsModal';
 import ChatPanel from '@/components/chat/mainPanel/ChatArea';
 import { Message } from '@/components/chat/mainPanel/types';
-import { useUser } from '@/contexts/UserContext';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createNewChatTitle } from '@/utils/date';
 import { websocketService } from '@/services/websocket';
 import { self } from '@/services/user';
 import { isTokenExpired } from '@/utils/jwt';
+import { useAppSelector } from '@/hooks/useAppSelector';
+import { useAppDispatch } from '@/hooks/useAppDispatch';
+import { setUser } from '@/store/slices/userSlice';
+import { setChatHistory, setCurrentChatId, setMessages, addMessage, setActiveIcon, toggleSidebar, toggleModal } from '@/store/slices/chatSlice';
+import { ChatHistoryItem } from '@/components/chat/Sidebar/types';
+import { UserDTO } from '@/types/user';
 
-
-interface ChatHistoryItem {
-  id: string;
-  title: string;
-  lastMessage: string;
-}
-
-// --- Mock Data ---
-const mockChatHistory: ChatHistoryItem[] = [
-  { id: 'chat1', title: 'Summary of Tech News Today', lastMessage: 'AI advancements dominate headlines...' },
-  { id: 'chat2', title: 'Questions about Market Trends', lastMessage: 'Can you explain the recent dip?' },
-  { id: 'chat3', title: 'Follow-up on Renewable Energy', lastMessage: 'Sources mentioned solar power increase...' },
-  { id: 'chat4', title: 'Drafting an email about summary', lastMessage: 'Subject: Key Takeaways from...' },
-];
-
-const mockMessages: Message[] = [
-  { id: 'msg1', sender: 'user', text: 'Summarize the latest news about AI regulations.' },
-  { id: 'msg2', sender: 'ai', text: 'Certainly! Recent developments include proposals for AI safety standards in the EU and ongoing discussions in the US Congress regarding transparency requirements for AI models...' },
-  { id: 'msg3', sender: 'user', text: 'What are the main points of the EU proposal?' },
-  { id: 'msg4', sender: 'ai', text: 'The EU proposal focuses on risk-based categorization, with stricter rules for high-risk AI systems like those used in critical infrastructure or law enforcement. Key points include data quality requirements, human oversight mandates, and clear information for users interacting with AI systems.' },
-];
 
 // --- Styled Components ---
 const ChatLayoutContainer = styled.div`
@@ -46,15 +30,18 @@ const ChatLayoutContainer = styled.div`
 
 // --- Chat Page Component ---
 const ChatPage: React.FC = () => {
-  const { user, setUser } = useUser();
-  const [chatHistory, setChatHistory] = useState<ChatHistoryItem[]>(mockChatHistory);
-  const [currentChatId, setCurrentChatId] = useState<string | null>(mockChatHistory[0]?.id || null);
-  const [messages, setMessages] = useState<Message[]>(mockMessages);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [activeIcon, setActiveIcon] = useState<'chat' | 'config' | null>('chat');
   const router = useRouter();
   const searchParams = useSearchParams();
+  const dispatch = useAppDispatch();
+  
+  // Get state from Redux
+  const user = useAppSelector<UserDTO>((state) => state.user.user);
+  const activeIcon = useAppSelector<'chat' | 'config' | null>((state) => state.chat.activeIcon);
+  const isSidebarOpen = useAppSelector<boolean>((state) => state.chat.isSidebarOpen);
+  const currentChatId = useAppSelector<string|null>((state) => state.chat.currentChatId);
+  const chatHistory = useAppSelector<ChatHistoryItem[]>((state) => state.chat.chatHistory);
+  const messages = useAppSelector<Message[]>((state) => state.chat.messages);
+  const isModalOpen = useAppSelector<boolean>((state) => state.chat.isModalOpen);
 
   const activeChat = chatHistory.find(chat => chat.id === currentChatId);
 
@@ -63,15 +50,15 @@ const ChatPage: React.FC = () => {
     const fetchUserData = async () => {
       try {
         const user = await self();
-        setUser(user);
+        dispatch(setUser(user));
       } catch (error) {
         console.error('Failed to fetch user data:', error);
         router.replace('/login');
       }
     };
 
-    fetchUserData(); 
-  }, [router, setUser]);
+    fetchUserData();
+  }, [router, dispatch]);
 
   useEffect(() => {
     // get token
@@ -100,19 +87,18 @@ const ChatPage: React.FC = () => {
       const newChatTitle = createNewChatTitle();
       
       // Create new chat
-      const newChat: ChatHistoryItem = {
+      const newChat = {
         id: chatId,
         title: newChatTitle,
         lastMessage: '새로운 대화를 시작합니다.'
       };
       
       // Update chat history and set as current chat
-      setChatHistory(prev => [newChat, ...prev]);
-      setCurrentChatId(chatId);
-      setMessages([]); // Clear messages for new chat
+      dispatch(setChatHistory([newChat, ...chatHistory]));
+      dispatch(setCurrentChatId(chatId));
+      dispatch(setMessages([])); // Clear messages for new chat
     } catch (error) {
       console.error('Failed to create new chat:', error);
-      // Handle error (show error message to user)
     }
   };
 
@@ -121,29 +107,24 @@ const ChatPage: React.FC = () => {
       // Send message through WebSocket
       websocketService.sendMessage(message);
 
-      // Add message to local state
+      // Add message to Redux state
       const userMessage: Message = {
         id: `msg${Date.now()}`,
         sender: 'user',
         text: message,
       };
 
-      setMessages(prev => [...prev, userMessage]);
+      dispatch(addMessage(userMessage));
     } catch (error) {
       console.error('Failed to send message:', error);
-      // Handle error (show error message to user)
     }
   };
 
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
-
   const handleIconClick = (icon: 'chat' | 'config') => {
-    setActiveIcon(icon);
-    // Config icon click will be handled by routing to a separate page
+    dispatch(setActiveIcon(icon));
+    
     if (icon === 'config') {
-      // TODO: Add routing to config page
+      // TODO: Implement routing to config page
       console.log('Navigate to config page');
     }
   };
@@ -152,8 +133,8 @@ const ChatPage: React.FC = () => {
     <ChatLayoutContainer>
       <SideTrail
         isSidebarOpen={isSidebarOpen}
-        onToggleSidebar={toggleSidebar}
-        onOpenSettings={() => setIsModalOpen(true)}
+        onToggleSidebar={() => dispatch(toggleSidebar())}
+        onOpenSettings={() => dispatch(toggleModal())}
         username={user?.username || 'Guest'}
         activeIcon={activeIcon}
         onIconClick={handleIconClick}
@@ -161,10 +142,10 @@ const ChatPage: React.FC = () => {
 
       <Sidebar 
         isOpen={isSidebarOpen}
-        onClose={toggleSidebar}
+        onClose={() => dispatch(toggleSidebar())}
         chatHistory={chatHistory} 
         activeChatId={currentChatId} 
-        onChatSelect={(newChatId) => setCurrentChatId(newChatId)} 
+        onChatSelect={(newChatId) => dispatch(setCurrentChatId(newChatId))} 
         onNewChat={handleNewChat} 
       />
       
@@ -186,7 +167,7 @@ const ChatPage: React.FC = () => {
       {isModalOpen && (
         <SettingsModal
           isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
+          onClose={() => dispatch(toggleModal())}
           username={user?.username || 'Guest'}
           userPlan="Free Plan"
         />

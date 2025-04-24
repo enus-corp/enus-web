@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { SettingsModalProps, ModalTab } from './types';
 import { createStyles } from './styles';
-import { useTheme } from '@/contexts/ThemeContext';
-import { useUser } from '@/contexts/UserContext';
 import styled from 'styled-components';
+import { useAppSelector } from '@/hooks/useAppSelector';
+import { useAppDispatch } from '@/hooks/useAppDispatch';
+import { setUser } from '@/store/slices/userSlice';
+import { toggleTheme } from '@/store/slices/themeSlice';
 
 const styles = createStyles({
   width: '70vw',
@@ -66,9 +68,9 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   userPlan = 'Pro Plan',
   avatarUrl
 }) => {
+  const dispatch = useAppDispatch();
+  const theme = useAppSelector((state) => state.theme.isDarkMode);
   const [activeTab, setActiveTab] = useState<ModalTab>('Settings');
-  const { theme, toggleTheme } = useTheme();
-  const { setUser } = useUser();
   const {
     ModalBackdrop,
     ModalContent,
@@ -93,8 +95,12 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   const handleLogout = () => {
     console.log('Logging out...');
     localStorage.removeItem('accessToken');
-    setUser(null);
+    dispatch(setUser(null));
     window.location.href = '/login';
+  };
+
+  const handleThemeToggle = () => {
+    dispatch(toggleTheme());
   };
 
   const renderContent = () => {
@@ -106,8 +112,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
             <SettingsSection>
               <SettingItem>
                 <SettingLabel>Theme</SettingLabel>
-                <ThemeToggleButton onClick={toggleTheme}>
-                  Switch to {theme === 'light' ? 'Dark' : 'Light'} Mode
+                <ThemeToggleButton onClick={handleThemeToggle}>
+                  Switch to {theme ? 'Dark' : 'Light'} Mode
                 </ThemeToggleButton>
               </SettingItem>
             </SettingsSection>

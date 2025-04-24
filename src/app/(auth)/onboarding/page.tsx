@@ -42,7 +42,6 @@ export default function OnboardingPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        console.log(formData);
         try {
             await update(formData)
             setTimeout(() => router.replace('/chat'), 2000);
