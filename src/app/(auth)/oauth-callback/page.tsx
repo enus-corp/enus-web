@@ -5,7 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import styled from 'styled-components';
 import { UserDTO } from '@/types/user';
 import { exchangeToken as exchange } from '@/services/auth';
-import { useAppDispatch } from '@/hooks/useAppDispatch';
+import { useRootAppDispatch } from '@/hooks/useAppDispatch';
 import { setUser } from '@/store/slices/userSlice';
 
 // Basic styled component for feedback
@@ -27,7 +27,7 @@ const Message = styled.p`
 export default function OAuthCallbackPage() {
     const searchParams = useSearchParams();
     const router = useRouter();
-    const dispatch = useAppDispatch();
+    const dispatch = useRootAppDispatch();
 
     const [message, setMessage] = useState('Processing authentication...');
     const [error, setError] = useState<string | null>(null);

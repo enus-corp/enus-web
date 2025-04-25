@@ -6,7 +6,6 @@ import { createStyles } from './styles';
 
 const styles = createStyles({
   drawerWidth: 280,
-  trailWidth: 60
 });
 
 interface SidebarProps {
@@ -28,7 +27,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const { Sidebar, CloseDrawerButton } = styles;
   return (
-    <Sidebar isOpen={isOpen}>
+    <Sidebar $isOpen={isOpen}>
       <CloseDrawerButton onClick={onClose}>
         &times;
       </CloseDrawerButton>

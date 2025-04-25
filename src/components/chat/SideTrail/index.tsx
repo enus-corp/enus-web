@@ -2,7 +2,7 @@ import React from 'react';
 import { SideTrailProps } from './types';
 import { createStyles } from './styles';
 
-const { SideTrail: StyledSideTrail, TrailIcon, OpenDrawerButton, UserAvatar } = createStyles();
+const { SideTrail, TrailIcon, OpenDrawerButton, UserAvatar } = createStyles({ trailWidth: 80 });
 
 const SideTrailComponent: React.FC<SideTrailProps> = ({
   isSidebarOpen,
@@ -19,7 +19,7 @@ const SideTrailComponent: React.FC<SideTrailProps> = ({
     .toUpperCase();
 
   return (
-    <StyledSideTrail>
+    <SideTrail>
       {/* Open Drawer Button */}
       <OpenDrawerButton
         $isActive={false}
@@ -51,7 +51,7 @@ const SideTrailComponent: React.FC<SideTrailProps> = ({
       <UserAvatar onClick={onOpenSettings} title="User Settings">
         {userInitials}
       </UserAvatar>
-    </StyledSideTrail>
+    </SideTrail>
   );
 };
 

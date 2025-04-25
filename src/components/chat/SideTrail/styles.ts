@@ -1,5 +1,4 @@
 import styled from 'styled-components';
-import { ChatLayoutStyles } from '../ChatLayout/types';
 
 const TrailIcon = styled.div<{ $isActive: boolean }>`
   width: 48px;
@@ -20,6 +19,7 @@ const TrailIcon = styled.div<{ $isActive: boolean }>`
   }
 `;
 
+// create component that inherits from TrailIcon
 const OpenDrawerButton = styled(TrailIcon)`
   background-color: #FF6B35;
   margin-bottom: 10px;
@@ -46,14 +46,10 @@ const UserAvatar = styled.div`
   border: 1px solid #252525;
 `;
 
-const defaultStyles: ChatLayoutStyles = {
-  drawerWidth: 280,
-  trailWidth: 80
-};
 
-export const createStyles = (styles: ChatLayoutStyles = defaultStyles) => ({
+export const createStyles = ({ trailWidth }: { trailWidth: number }) => ({
   SideTrail: styled.aside`
-    width: ${styles.trailWidth}px;
+    width: ${trailWidth}px;
     height: 100vh;
     background-color: #FFFFFF;
     border-right: 1px solid #E0E0E0;

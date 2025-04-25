@@ -2,6 +2,9 @@ import styled from 'styled-components';
 import { SettingsModalStyles } from './types';
 
 export const createStyles = (styles: SettingsModalStyles) => {
+  /**
+   * Modal Styles
+   */
   const ModalBackdrop = styled.div`
     position: fixed;
     top: 0;
@@ -30,32 +33,6 @@ export const createStyles = (styles: SettingsModalStyles) => {
     overflow: hidden;
   `;
 
-  const ModalSidebar = styled.aside`
-    width: 200px;
-    background-color: #F8F9FA;
-    border-right: 1px solid #E0E0E0;
-    padding: 20px 0;
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-  `;
-
-  const ModalMainContent = styled.div`
-    flex: 1;
-    padding: 30px 40px;
-    overflow-y: auto;
-  `;
-
-  const ModalTitle = styled.h2`
-    font-family: 'Avenir', sans-serif;
-    font-weight: 700;
-    font-size: 20px;
-    color: #252525;
-    margin: 0 0 10px 0;
-    text-align: left;
-    padding: 30px 40px 0 40px;
-  `;
-
   const ModalCloseButton = styled.button`
     position: absolute;
     top: 15px;
@@ -73,6 +50,16 @@ export const createStyles = (styles: SettingsModalStyles) => {
     }
   `;
 
+  const ModalSidebar = styled.aside`
+    width: 200px;
+    background-color: #F8F9FA;
+    border-right: 1px solid #E0E0E0;
+    padding: 20px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  `;
+  
   const ModalProfileSection = styled.div`
     display: flex;
     flex-direction: column;
@@ -136,6 +123,69 @@ export const createStyles = (styles: SettingsModalStyles) => {
     }
   `;
 
+  const ModalMainContent = styled.div`
+    flex: 1;
+    padding: 30px 40px;
+    overflow-y: auto;
+  `;
+  
+  /**
+   * Modal Detail styles
+   */
+  const ModalTitle = styled.h2`
+    font-family: 'Avenir', sans-serif;
+    font-weight: 700;
+    font-size: 20px;
+    color: #252525;
+    margin: 0 0 10px 0;
+    text-align: left;
+    padding: 30px 40px 0 40px;
+  `;
+
+  const SettingsSection = styled.div`
+    margin-top: 20px;
+  `;
+
+  const SettingItem = styled.div`
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid ${({ theme }) => theme.divider};
+  `;
+
+  const SettingLabel = styled.span`
+    font-size: 1rem;
+    color: ${({ theme }) => theme.text};
+  `;
+
+  const ThemeToggleButton = styled.button`
+    padding: 6px 12px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    border-radius: 6px;
+    border: 1px solid ${({ theme }) => theme.inputBorder};
+    background-color: ${({ theme }) => theme.buttonPrimaryBg};
+    color: ${({ theme }) => theme.buttonPrimaryText};
+    transition: background-color 0.2s ease, color 0.2s ease;
+
+    &:hover {
+      background-color: ${({ theme }) => theme.buttonPrimaryHoverBg};
+    }
+  `;
+
+  const LogoutButton = styled(ThemeToggleButton)`
+    background-color: #FF6B35;
+    border-color: #F59E0B;
+    color: #FFFFFF;
+    margin-top: 20px;
+
+    &:hover {
+      background-color: #D97706;
+      border-color: #B45309;
+    }
+  `;
+  
   return {
     ModalBackdrop,
     ModalContent,
@@ -148,6 +198,11 @@ export const createStyles = (styles: SettingsModalStyles) => {
     ModalUserName,
     ModalUserPlan,
     ModalDivider,
-    ModalOption
+    ModalOption,
+    SettingsSection,
+    SettingItem,
+    SettingLabel,
+    ThemeToggleButton,
+    LogoutButton
   };
 }; 

@@ -1,4 +1,6 @@
+import { RootAppDispatch } from '@/store/appStore';
+import { ThemeAppDispatch } from '@/store/themeStore';
 import { useDispatch } from 'react-redux';
-import type { AppDispatch } from '@/store';
 
-export const useAppDispatch = () => useDispatch<AppDispatch>(); 
+export const useRootAppDispatch = () => useDispatch<RootAppDispatch>(); 
+export const useThemeDispatch = () => useDispatch<ThemeAppDispatch>(); 

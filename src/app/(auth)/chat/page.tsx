@@ -12,8 +12,8 @@ import { createNewChatTitle } from '@/utils/date';
 import { websocketService } from '@/services/websocket';
 import { self } from '@/services/user';
 import { isTokenExpired } from '@/utils/jwt';
-import { useAppSelector } from '@/hooks/useAppSelector';
-import { useAppDispatch } from '@/hooks/useAppDispatch';
+import { useRootAppSelector } from '@/hooks/useAppSelector';
+import { useRootAppDispatch } from '@/hooks/useAppDispatch';
 import { setUser } from '@/store/slices/userSlice';
 import { setChatHistory, setCurrentChatId, setMessages, addMessage, setActiveIcon, toggleSidebar, toggleModal } from '@/store/slices/chatSlice';
 import { ChatHistoryItem } from '@/components/chat/Sidebar/types';
@@ -32,16 +32,16 @@ const ChatLayoutContainer = styled.div`
 const ChatPage: React.FC = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const dispatch = useAppDispatch();
+  const dispatch = useRootAppDispatch();
   
   // Get state from Redux
-  const user = useAppSelector<UserDTO>((state) => state.user.user);
-  const activeIcon = useAppSelector<'chat' | 'config' | null>((state) => state.chat.activeIcon);
-  const isSidebarOpen = useAppSelector<boolean>((state) => state.chat.isSidebarOpen);
-  const currentChatId = useAppSelector<string|null>((state) => state.chat.currentChatId);
-  const chatHistory = useAppSelector<ChatHistoryItem[]>((state) => state.chat.chatHistory);
-  const messages = useAppSelector<Message[]>((state) => state.chat.messages);
-  const isModalOpen = useAppSelector<boolean>((state) => state.chat.isModalOpen);
+  const user = useRootAppSelector<UserDTO|null>((state) => state.user.user);
+  const activeIcon = useRootAppSelector<'chat' | 'config' | null>((state) => state.chat.activeIcon);
+  const isSidebarOpen = useRootAppSelector<boolean>((state) => state.chat.isSidebarOpen);
+  const currentChatId = useRootAppSelector<string|null>((state) => state.chat.currentChatId);
+  const chatHistory = useRootAppSelector<ChatHistoryItem[]>((state) => state.chat.chatHistory);
+  const messages = useRootAppSelector<Message[]>((state) => state.chat.messages);
+  const isModalOpen = useRootAppSelector<boolean>((state) => state.chat.isModalOpen);
 
   const activeChat = chatHistory.find(chat => chat.id === currentChatId);
 

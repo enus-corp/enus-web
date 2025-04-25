@@ -1,10 +1,9 @@
 import styled from 'styled-components';
-import { ChatLayoutStyles } from '../ChatLayout/types';
 
-export const createStyles = ({ drawerWidth, trailWidth }: ChatLayoutStyles) => ({
+export const createStyles = ({ drawerWidth }: { drawerWidth: number }) => ({
 
-  Sidebar : styled.aside<{ isOpen: boolean }>`
-    width: 280px;
+  Sidebar : styled.aside<{ $isOpen: boolean }>`
+    width: ${drawerWidth}px;
     background-color: #F8F9FA; /* Light grey background */
     border-right: 1px solid #E0E0E0; /* Subtle border */
     display: flex;
@@ -18,9 +17,9 @@ export const createStyles = ({ drawerWidth, trailWidth }: ChatLayoutStyles) => (
     height: 100%;
     z-index: 900; 
     /* Adjust transform based on new left position */
-    transform: translateX(${props => props.isOpen ? '0' : '-100%'}); 
+    transform: translateX(${props => props.$isOpen ? '0' : '-100%'}); 
     transition: transform 0.3s ease-in-out;
-    box-shadow: ${props => props.isOpen ? '2px 0 10px rgba(0,0,0,0.1)' : 'none'}; /* Add shadow when open */
+    box-shadow: ${props => props.$isOpen ? '2px 0 10px rgba(0,0,0,0.1)' : 'none'}; /* Add shadow when open */
   `,
 
   // Button to close the drawer from within

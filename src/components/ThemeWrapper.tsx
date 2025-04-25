@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
-import { useAppSelector } from '@/hooks/useAppSelector';
+import { useThemeSelector } from '@/hooks/useAppSelector';
 import { lightTheme, darkTheme } from '@/styles/theme';
 import { createGlobalStyle } from 'styled-components';
 import { Geist } from "next/font/google";
@@ -28,7 +28,7 @@ export default function ThemeWrapper({
 }: {
   children: React.ReactNode;
 }) {
-  const isDarkMode = useAppSelector((state) => state.theme.isDarkMode);
+  const isDarkMode = useThemeSelector((state) => state.theme.isDarkMode);
 
   return (
     <ThemeProvider theme={isDarkMode ? darkTheme : lightTheme}>

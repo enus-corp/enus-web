@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { createStyles } from './styles';
 import { Message, ChatConfig } from '../types';
 import ConfigPanel from '../TtsConfig';
@@ -26,6 +26,8 @@ const ChatArea: React.FC<ChatAreaProps> = ({
 }) => {
   const { ChatPanel, ChatHeader, MessageArea, MessageBubble, InputArea, InputForm, ChatInput, SendButton } = createStyles();
   const [message, setMessage] = useState('');
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [isOpen, setIsOpen] = useState(isSidebarOpen);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,22 +37,24 @@ const ChatArea: React.FC<ChatAreaProps> = ({
     }
   };
 
-  const styles = createStyles();
+  useEffect(() => {
+    setIsOpen(isSidebarOpen);
+  }, [isSidebarOpen]);
 
   if (isConfigMode) {
     return (
-      <styles.ChatPanel isSidebarOpen={isSidebarOpen}>
+      <ChatPanel $isSidebarOpen={isOpen}>
         <ConfigPanel
           chatId={chatId}
           config={config}
           onConfigChange={onConfigChange}
         />
-      </styles.ChatPanel>
+      </ChatPanel>
     );
   }
 
   return (
-    <ChatPanel isSidebarOpen={isSidebarOpen}>
+    <ChatPanel $isSidebarOpen={isSidebarOpen}>
 
       {/* Header */}
       <ChatHeader>

@@ -1,5 +1,4 @@
 import styled from 'styled-components';
-import { ChatLayoutStyles } from '@/components/chat/ChatLayout/types';
 
 const ChatHeader = styled.div`
   padding: 20px;
@@ -67,18 +66,13 @@ const SendButton = styled.button`
   }
 `;
 
-const defaultStyles: ChatLayoutStyles = {
-  drawerWidth: 280,
-  trailWidth: 80
-};
-
-export const createStyles = (styles: ChatLayoutStyles = defaultStyles) => ({
-  ChatPanel: styled.div<{ isSidebarOpen?: boolean }>`
+export const createStyles = () => ({
+  ChatPanel: styled.div<{ $isSidebarOpen?: boolean }>`
     flex: 1;
     display: flex;
     flex-direction: column;
     height: 100vh;
-    margin-left: ${props => props.isSidebarOpen ? '360px' : '80px'};
+    margin-left: ${props => props.$isSidebarOpen ? '360px' : '80px'};
     transition: margin-left 0.3s ease-in-out;
     background-color: #FFFFFF;
     position: relative;

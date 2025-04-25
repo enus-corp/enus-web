@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { SettingsModalProps, ModalTab } from './types';
 import { createStyles } from './styles';
-import styled from 'styled-components';
-import { useAppSelector } from '@/hooks/useAppSelector';
-import { useAppDispatch } from '@/hooks/useAppDispatch';
+import { useRootAppSelector } from '@/hooks/useAppSelector';
+import { useRootAppDispatch } from '@/hooks/useAppDispatch';
 import { setUser } from '@/store/slices/userSlice';
 import { toggleTheme } from '@/store/slices/themeSlice';
 
@@ -17,49 +16,6 @@ const styles = createStyles({
   boxShadow: '0 5px 20px rgba(0, 0, 0, 0.15)'
 });
 
-const SettingsSection = styled.div`
-  margin-top: 20px;
-`;
-
-const SettingItem = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 0;
-  border-bottom: 1px solid ${({ theme }) => theme.divider};
-`;
-
-const SettingLabel = styled.span`
-  font-size: 1rem;
-  color: ${({ theme }) => theme.text};
-`;
-
-const ThemeToggleButton = styled.button`
-  padding: 6px 12px;
-  font-size: 0.9rem;
-  cursor: pointer;
-  border-radius: 6px;
-  border: 1px solid ${({ theme }) => theme.inputBorder};
-  background-color: ${({ theme }) => theme.buttonPrimaryBg};
-  color: ${({ theme }) => theme.buttonPrimaryText};
-  transition: background-color 0.2s ease, color 0.2s ease;
-
-  &:hover {
-    background-color: ${({ theme }) => theme.buttonPrimaryHoverBg};
-  }
-`;
-
-const LogoutButton = styled(ThemeToggleButton)`
-  background-color: #FF6B35;
-  border-color: #F59E0B;
-  color: #FFFFFF;
-  margin-top: 20px;
-
-  &:hover {
-    background-color: #D97706;
-    border-color: #B45309;
-  }
-`;
 
 const SettingsModal: React.FC<SettingsModalProps> = ({
   isOpen,
@@ -68,8 +24,9 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   userPlan = 'Pro Plan',
   avatarUrl
 }) => {
-  const dispatch = useAppDispatch();
-  const theme = useAppSelector((state) => state.theme.isDarkMode);
+  const dispatch = useRootAppDispatch();
+  const isDarkMode = useRootAppSelector((state) => state.theme.isDarkMode);
+
   const [activeTab, setActiveTab] = useState<ModalTab>('Settings');
   const {
     ModalBackdrop,
@@ -83,7 +40,12 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
     ModalUserName,
     ModalUserPlan,
     ModalDivider,
-    ModalOption
+    ModalOption,
+    SettingsSection,
+    SettingItem,
+    SettingLabel,
+    ThemeToggleButton,
+    LogoutButton
   } = styles;
 
   if (!isOpen) return null;
@@ -113,7 +75,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
               <SettingItem>
                 <SettingLabel>Theme</SettingLabel>
                 <ThemeToggleButton onClick={handleThemeToggle}>
-                  Switch to {theme ? 'Dark' : 'Light'} Mode
+                  Switch to {isDarkMode ? 'Dark' : 'Light'} Mode
                 </ThemeToggleButton>
               </SettingItem>
             </SettingsSection>
