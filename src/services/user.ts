@@ -27,13 +27,13 @@ export const self = async (): Promise<UserDTO> => {
     }
 }
 
-export const update = async (userData: UpdateUserRequest): Promise<void> => {
+export const update = async (userData: UpdateUserRequest): Promise<UserDTO> => {
     try {
         const response = await protectedApi.update(userData);
         if (response.data) {
             if (!response.data.error) {
                 // success
-                return;
+                return response.data.data!;
             } else {
                 // fail
                 throw new Error(response.data.message || "error occured during update");
