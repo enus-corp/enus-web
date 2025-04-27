@@ -40,3 +40,8 @@ export const getTokenRemainingTime = (token: string): number | null => {
     return null;
   }
 }; 
+
+export const removeTokens = () => {
+  localStorage.removeItem("accessToken");
+  localStorage.removeItem("refreshToken");
+}

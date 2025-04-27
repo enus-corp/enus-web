@@ -37,9 +37,9 @@ export default function OAuthCallbackPage() {
         console.log('OAuth Callback - Received tempToken:', tempToken ? 'Present' : 'Missing');
 
         if (!tempToken) {
-            console.error('OAuth Callback - No tempToken found in URL parameters');
+            console.log('OAuth Callback - No tempToken found in URL parameters (expected in some cases)');
             setError('Temporary token not found. Redirecting to login...');
-            setTimeout(() => router.push('/login'), 3000);
+            setTimeout(() => router.replace('/login'), 3000);
             return;
         }
 
@@ -65,12 +65,13 @@ export default function OAuthCallbackPage() {
                 localStorage.setItem('refreshToken', token.refreshToken);
 
                 const infoRequired = needsAdditionalInfo(user);
-                console.log('OAuth Callback - User info required:', infoRequired);
                 
                 if (infoRequired) {
-                    dispatch(setUser(user));
+                    // redirect to onboarding page 
                     router.replace("/onboarding");
                 } else {
+                    // additional info is not required, set user and redirect to chat
+                    dispatch(setUser(user));
                     setMessage("Authentication successful! Redirecting...");
                     setTimeout(() => router.replace('/chat'), 2000);
                 }

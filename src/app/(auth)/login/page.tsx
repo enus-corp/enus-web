@@ -1,14 +1,16 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { loginUser, oauthLogin } from '../../../services/auth';
+import { loginUser, oauthLogin, refreshToken as refresh } from '../../../services/auth';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import { LoginPageContainer, LeftPanel, LoginForm, Title, InputField, InputWrapper, PasswordToggleButton, SubmitButton, Divider, OAuthContainer, OAuthButton, SignUpLink, RightPanel, AnimatedShape1, AnimatedShape2, AnimatedShape3, Snackbar } from './styles';
 import { SigninResponse } from '@/types/response/signinResponse';
+import { isTokenExpired, removeTokens } from '@/utils/jwt';
+import { Token } from '@/types/token';
 
 
 // --- Login Page Component ---
@@ -25,6 +27,41 @@ const LoginPage = () => {
       isError: false 
   });
   const router = useRouter();
+
+  useEffect(() => {
+    const getNewTokens = async (refreshToken: string) => {
+      try {
+        const newToken: Token = await refresh({ refreshToken: refreshToken });
+        localStorage.setItem("accessToken", newToken.accessToken);
+        localStorage.setItem("refreshToken", newToken.refreshToken);
+        router.replace('/chat');
+      } catch (err) {
+        console.log("Failed to refresh tokens. removing tokens from storage");
+        removeTokens();
+        setError(err instanceof Error ? err.message : 'An unknown error occurred during token refresh');
+        console.log("error", err);
+      }
+    }
+
+    // check if access token and refresh token exists
+    const accessToken = localStorage.getItem("accessToken");
+    const refreshToken = localStorage.getItem("refreshToken");
+
+    console.log("--------------login page--------------");
+
+    // check if access token exists and is valid
+    // if not expired, redirect to chat page
+    if (accessToken && !isTokenExpired(accessToken)) {
+      router.replace('/chat');
+      return;
+    }
+
+    // check if refresh token exists and is valid
+    // if not expired, get new access token
+    if (refreshToken && !isTokenExpired(refreshToken)) {
+      getNewTokens(refreshToken);
+    }
+  }, [router]);
 
   const showSnackbar = (message: string, isError: boolean = false) => {
     setSnackbar({ message, isVisible: true, isError });

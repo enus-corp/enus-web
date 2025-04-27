@@ -86,6 +86,7 @@ export const exchangeToken = async (tempToken: {tempToken: string}): Promise<{to
 
         return response.data.data!;
       } else {
+        // Query did not return a unique result: 2 were returned
         throw new Error(response.data.message || "error occured during exchange token");
       }
     }

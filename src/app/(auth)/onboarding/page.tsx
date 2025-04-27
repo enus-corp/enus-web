@@ -4,7 +4,8 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { OnboardingContainer, Form, Title, FormGroup, Label, Input, Select, Button, Snackbar } from './styles';
 import { self, update } from '@/services/user';
-
+import { setUser } from '@/store/slices/userSlice';
+import { useRootAppDispatch } from '@/hooks/useAppDispatch';
 interface UserFormData {
     firstName: string;
     lastName: string;
@@ -15,6 +16,7 @@ interface UserFormData {
 }
 
 export default function OnboardingPage() {
+    const dispatch = useRootAppDispatch();
     const router = useRouter();
     const [snackbar, setSnackbar] = useState<{ message: string; isError: boolean } | null>(null);
 
@@ -43,7 +45,8 @@ export default function OnboardingPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            await update(formData)
+            const user = await update(formData)
+            dispatch(setUser(user));
             setTimeout(() => router.replace('/chat'), 2000);
             showSnackbar("Profile updated successfully! Redirecting to chat...", false);
         } catch (error) {
