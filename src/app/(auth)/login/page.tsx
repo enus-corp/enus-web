@@ -11,6 +11,7 @@ import { LoginPageContainer, LeftPanel, LoginForm, Title, InputField, InputWrapp
 import { SigninResponse } from '@/types/response/signinResponse';
 import { isTokenExpired, removeTokens } from '@/utils/jwt';
 import { Token } from '@/types/token';
+import clientApi from '@/services/clientApi';
 
 
 // --- Login Page Component ---
@@ -27,41 +28,6 @@ const LoginPage = () => {
       isError: false 
   });
   const router = useRouter();
-
-  useEffect(() => {
-    const getNewTokens = async (refreshToken: string) => {
-      try {
-        const newToken: Token = await refresh({ refreshToken: refreshToken });
-        localStorage.setItem("accessToken", newToken.accessToken);
-        localStorage.setItem("refreshToken", newToken.refreshToken);
-        router.replace('/chat');
-      } catch (err) {
-        console.log("Failed to refresh tokens. removing tokens from storage");
-        removeTokens();
-        setError(err instanceof Error ? err.message : 'An unknown error occurred during token refresh');
-        console.log("error", err);
-      }
-    }
-
-    // check if access token and refresh token exists
-    const accessToken = localStorage.getItem("accessToken");
-    const refreshToken = localStorage.getItem("refreshToken");
-
-    console.log("--------------login page--------------");
-
-    // check if access token exists and is valid
-    // if not expired, redirect to chat page
-    if (accessToken && !isTokenExpired(accessToken)) {
-      router.replace('/chat');
-      return;
-    }
-
-    // check if refresh token exists and is valid
-    // if not expired, get new access token
-    if (refreshToken && !isTokenExpired(refreshToken)) {
-      getNewTokens(refreshToken);
-    }
-  }, [router]);
 
   const showSnackbar = (message: string, isError: boolean = false) => {
     setSnackbar({ message, isVisible: true, isError });
@@ -84,14 +50,9 @@ const LoginPage = () => {
 
     setIsLoading(true);
     try {
-      const tokenData : SigninResponse = await loginUser({ email, password });
-      const { accessToken, refreshToken } = tokenData;
-      
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('accessToken', accessToken);
-        localStorage.setItem('refreshToken', refreshToken);
-      }
-      
+      const response = await clientApi.post<SigninResponse>("/api/auth/signin", {email, password});
+      const { accessToken, refreshToken } = response.data;
+
       showSnackbar('Login Successful! Redirecting...', false);
 
       setTimeout(() => {

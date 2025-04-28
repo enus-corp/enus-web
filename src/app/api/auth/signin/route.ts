@@ -4,16 +4,14 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
     try {
-        const credentials = await request.json();
-        const response = await loginUser(credentials);
+        const body = await request.json();
+        const response = await loginUser(body);
         const {accessToken, refreshToken} = response;
 
         // store refresh token in HTTP-only cookie
-        (await
-            // store refresh token in HTTP-only cookie
-            cookies()).set("refreshToken", refreshToken, {
+        (await cookies()).set("refreshToken", refreshToken, {
             httpOnly: true,
-            secure: true,
+            secure: process.env.NODE_ENV === "production",
             sameSite: "strict",
             path: "/",
             maxAge: 60 * 60 * 24 // 1day
