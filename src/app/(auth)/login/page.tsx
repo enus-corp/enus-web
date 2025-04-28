@@ -1,16 +1,14 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { loginUser, oauthLogin, refreshToken as refresh } from '../../../services/auth';
+import { oauthLogin } from '../../../services/auth';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import { LoginPageContainer, LeftPanel, LoginForm, Title, InputField, InputWrapper, PasswordToggleButton, SubmitButton, Divider, OAuthContainer, OAuthButton, SignUpLink, RightPanel, AnimatedShape1, AnimatedShape2, AnimatedShape3, Snackbar } from './styles';
 import { SigninResponse } from '@/types/response/signinResponse';
-import { isTokenExpired, removeTokens } from '@/utils/jwt';
-import { Token } from '@/types/token';
 import clientApi from '@/services/clientApi';
 
 
@@ -50,8 +48,7 @@ const LoginPage = () => {
 
     setIsLoading(true);
     try {
-      const response = await clientApi.post<SigninResponse>("/api/auth/signin", {email, password});
-      const { accessToken, refreshToken } = response.data;
+      await clientApi.post<SigninResponse>("/api/auth/signin", {email, password});
 
       showSnackbar('Login Successful! Redirecting...', false);
 
