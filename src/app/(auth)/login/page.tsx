@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { oauthLogin } from '../../../services/auth';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import { LoginPageContainer, LeftPanel, LoginForm, Title, InputField, InputWrapper, PasswordToggleButton, SubmitButton, Divider, OAuthContainer, OAuthButton, SignUpLink, RightPanel, AnimatedShape1, AnimatedShape2, AnimatedShape3, Snackbar } from './styles';
@@ -69,7 +68,8 @@ const LoginPage = () => {
 
   const handleOAuth = (provider: string) => {
     console.log(`Initiating OAuth login with: ${provider}`);
-    oauthLogin(provider);
+    
+    window.location.href = `/api/auth/oauthLogin/${provider}`;
   };
 
   return (
