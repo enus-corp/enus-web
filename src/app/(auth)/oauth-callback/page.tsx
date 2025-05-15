@@ -2,27 +2,12 @@
 
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import styled from 'styled-components';
-import { UserDTO } from '@/types/user';
-import { exchangeToken as exchange } from '@/services/auth';
+import { User } from '@/types/user';
 import { useRootAppDispatch } from '@/hooks/useAppDispatch';
 import { setUser } from '@/store/slices/userSlice';
-
-// Basic styled component for feedback
-const CallbackContainer = styled.div`
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    flex-direction: column;
-    text-align: center;
-    padding: 20px;
-`;
-
-const Message = styled.p`
-    font-size: 1.2rem;
-    margin-bottom: 20px;
-`;
+import clientApi from '@/services/clientApi';
+import { CallbackContainer, Message } from './style';
+import { OAuthCallbackResponse } from '@/types/response/oauthCallbackResponse';
 
 export default function OAuthCallbackPage() {
     const searchParams = useSearchParams();
@@ -37,13 +22,13 @@ export default function OAuthCallbackPage() {
         console.log('OAuth Callback - Received tempToken:', tempToken ? 'Present' : 'Missing');
 
         if (!tempToken) {
-            console.log('OAuth Callback - No tempToken found in URL parameters (expected in some cases)');
+            console.log('OAuth Callback - No tempToken found in URL parameters');
             setError('Temporary token not found. Redirecting to login...');
             setTimeout(() => router.replace('/login'), 3000);
             return;
         }
 
-        const needsAdditionalInfo = (user: UserDTO) : boolean => {
+        const needsAdditionalInfo = (user: User) : boolean => {
             return (
                 !user.firstName || 
                 !user.lastName || 
@@ -54,23 +39,23 @@ export default function OAuthCallbackPage() {
             );
         }
 
-        const exchangeToken = async () => {
+        const handleTokenExchange = async () => {
             try {
-                console.log('OAuth Callback - Attempting token exchange...');
-                const response = await exchange({tempToken: tempToken});
-                console.log('OAuth Callback - Token exchange successful:', response);
-                
-                const { token, user } = response;
-                localStorage.setItem('accessToken', token.accessToken);
-                localStorage.setItem('refreshToken', token.refreshToken);
+                const response = await clientApi.post<OAuthCallbackResponse>('/api/auth/exchangeToken', { tempToken });
 
+                if (response.error) {
+                    console.error('OAuth Callback - Server returned error:', response.error);
+                    setError(response.message || 'Token exchange failed');
+                    return;
+                }
+
+                const { user } = response.data!;
+                
                 const infoRequired = needsAdditionalInfo(user);
                 
                 if (infoRequired) {
-                    // redirect to onboarding page 
                     router.replace("/onboarding");
                 } else {
-                    // additional info is not required, set user and redirect to chat
                     dispatch(setUser(user));
                     setMessage("Authentication successful! Redirecting...");
                     setTimeout(() => router.replace('/chat'), 2000);
@@ -78,16 +63,16 @@ export default function OAuthCallbackPage() {
             } catch (err) {
                 console.error('OAuth Callback - Token exchange failed:', err);
                 if (err instanceof Error) {
-                    console.error('OAuth Callback - Error details:', err.message);
+                    setError(err.message);
+                } else {
+                    setError('An unexpected error occurred');
                 }
-                localStorage.removeItem('accessToken');
-                localStorage.removeItem('refreshToken');
+                // No need to clear tokens - they're in HTTP-only cookies
                 setTimeout(() => router.replace('/login'), 3000);
             }
         };
 
-        exchangeToken();
-
+        handleTokenExchange();
     }, [searchParams, router, dispatch]);
 
     return (

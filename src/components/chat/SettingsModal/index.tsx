@@ -5,6 +5,7 @@ import { useRootAppSelector } from '@/hooks/useAppSelector';
 import { useRootAppDispatch } from '@/hooks/useAppDispatch';
 import { setUser } from '@/store/slices/userSlice';
 import { toggleTheme } from '@/store/slices/themeSlice';
+import clientApi from '@/services/clientApi';
 
 const styles = createStyles({
   width: '70vw',
@@ -54,11 +55,23 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
     setActiveTab(tab);
   };
 
-  const handleLogout = () => {
-    console.log('Logging out...');
-    localStorage.removeItem('accessToken');
-    dispatch(setUser(null));
-    window.location.href = '/login';
+  const handleLogout = async () => {
+    try {
+      console.log('Logging out...');
+      // Call the logout endpoint to clear cookies
+      await clientApi.post<{ data: { message: string } }>('/api/auth/logout', {});
+      
+      // Clear user state
+      dispatch(setUser(null));
+      
+      // Redirect to login page
+      window.location.href = '/login';
+    } catch (error) {
+      console.error('Logout failed:', error);
+      // Even if the API call fails, we should still clear the local state
+      dispatch(setUser(null));
+      window.location.href = '/login';
+    }
   };
 
   const handleThemeToggle = () => {

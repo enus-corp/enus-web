@@ -1,9 +1,9 @@
-import { UserDTO } from "@/types/user";
+import { User } from "@/types/user";
 import { protectedApi } from "./api";
 import axios from "axios";
 import { UpdateUserRequest } from "@/types/request/updateUserRequest";
 
-export const self = async (): Promise<UserDTO> => {
+export const self = async (): Promise<User> => {
     try {
         const response = await protectedApi.self();
         if (response.data) {
@@ -27,7 +27,7 @@ export const self = async (): Promise<UserDTO> => {
     }
 }
 
-export const update = async (userData: UpdateUserRequest): Promise<UserDTO> => {
+export const update = async (userData: UpdateUserRequest): Promise<User> => {
     try {
         const response = await protectedApi.update(userData);
         if (response.data) {

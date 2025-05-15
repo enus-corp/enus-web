@@ -17,7 +17,7 @@ import { useRootAppDispatch } from '@/hooks/useAppDispatch';
 import { setUser } from '@/store/slices/userSlice';
 import { setChatHistory, setCurrentChatId, setMessages, addMessage, setActiveIcon, toggleSidebar, toggleModal } from '@/store/slices/chatSlice';
 import { ChatHistoryItem } from '@/components/chat/Sidebar/types';
-import { UserDTO } from '@/types/user';
+import { User } from '@/types/user';
 
 
 // --- Styled Components ---
@@ -35,7 +35,7 @@ const ChatPage: React.FC = () => {
   const dispatch = useRootAppDispatch();
   
   // Get state from Redux
-  const user = useRootAppSelector<UserDTO|null>((state) => state.user.user);
+  const user = useRootAppSelector<User|null>((state) => state.user.user);
   const activeIcon = useRootAppSelector<'chat' | 'config' | null>((state) => state.chat.activeIcon);
   const isSidebarOpen = useRootAppSelector<boolean>((state) => state.chat.isSidebarOpen);
   const currentChatId = useRootAppSelector<string|null>((state) => state.chat.currentChatId);

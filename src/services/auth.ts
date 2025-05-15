@@ -5,7 +5,7 @@ import { SignupRequest } from '@/types/request/signupRequest';
 import { SigninResponse } from '@/types/response/signinResponse';
 import { protectedApi, publicApi } from './api';
 import { Token } from '@/types/token';
-import { UserDTO } from '@/types/user';
+import { User } from '@/types/user';
 import { RefreshTokenRequest } from '@/types/request/refreshTokenRequest';
 
 export const loginUser = async (credentials: SigninRequest): Promise<SigninResponse> => {
@@ -27,7 +27,7 @@ export const loginUser = async (credentials: SigninRequest): Promise<SigninRespo
       }
     } else {
       // unexpected error
-      throw new Error("error occured during login");
+      throw new Error("error occurred during login");
     }
   } catch (error) {
     if (axios.isAxiosError(error)) {
@@ -56,7 +56,7 @@ export const signupUser = async (userData: SignupRequest): Promise<void> => {
       }
     } else {
       // unexpected error
-      throw new Error("error occured during signup");
+      throw new Error("error occurred during signup");
     }
   } catch (error) {
     console.error('Signup Request Failed:', error);
@@ -69,7 +69,7 @@ export const signupUser = async (userData: SignupRequest): Promise<void> => {
   }
 };
 
-export const exchangeToken = async (tempToken: {tempToken: string}): Promise<{token: Token, user: UserDTO}> => {
+export const exchangeToken = async (tempToken: {tempToken: string}): Promise<{token: Token, user: User}> => {
   /**
    * Exchange temporary token for access and refresh tokens
    * Save tokens to local storage
@@ -79,18 +79,14 @@ export const exchangeToken = async (tempToken: {tempToken: string}): Promise<{to
     const response = await publicApi.exchangeToken(tempToken);
     if (response.data) {
       if (!response.data.error) {
-        const { token } = response.data.data!;
-        // save tokens to local storage
-        localStorage.setItem('accessToken', token.accessToken);
-        localStorage.setItem('refreshToken', token.refreshToken);
-
+        // Tokens are handled by BFF via cookies, just return the data
         return response.data.data!;
       } else {
         // Query did not return a unique result: 2 were returned
-        throw new Error(response.data.message || "error occured during exchange token");
+        throw new Error(response.data.message || "error occurred during exchange token");
       }
     }
-    throw new Error("error occured during exchange token");
+    throw new Error("error occurred during exchange token");
   } catch (error) {
     if (axios.isAxiosError(error)) {
       const backendMessage = error.response?.data?.message;
@@ -123,7 +119,7 @@ export const refreshToken = async (refreshToken: RefreshTokenRequest): Promise<T
         throw new Error(response.data.message || 'Failed to refresh token');
       }
     }
-    throw new Error("error occured during exchange token");
+    throw new Error("error occurred during token refresh");
   } catch (error) {
     if (axios.isAxiosError(error)) {
       const backendMessage = error.response?.data?.message;

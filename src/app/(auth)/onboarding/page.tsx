@@ -3,9 +3,11 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { OnboardingContainer, Form, Title, FormGroup, Label, Input, Select, Button, Snackbar } from './styles';
-import { self, update } from '@/services/user';
 import { setUser } from '@/store/slices/userSlice';
 import { useRootAppDispatch } from '@/hooks/useAppDispatch';
+import clientApi from '@/services/clientApi';
+import { User } from '@/types/user';
+
 interface UserFormData {
     firstName: string;
     lastName: string;
@@ -45,20 +47,41 @@ export default function OnboardingPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const user = await update(formData)
-            dispatch(setUser(user));
+            console.log('Onboarding - Updating user profile...');
+            const response = await clientApi.put<User>('/api/user/update', formData);
+            
+            if (response.error) {
+                throw new Error(response.message || 'Failed to update profile');
+            }
+
+            if (!response.data) {
+                throw new Error('No data received from server');
+            }
+
+            dispatch(setUser(response.data));
             setTimeout(() => router.replace('/chat'), 2000);
             showSnackbar("Profile updated successfully! Redirecting to chat...", false);
         } catch (error) {
             console.error("Error during user update: ", error);
-            showSnackbar("Error updating profile. Please try again.", true);
+            showSnackbar(error instanceof Error ? error.message : "Error updating profile. Please try again.", true);
         }
     }
 
     useEffect(() => {
         const getUser = async () => {
             try {
-                const user = await self();
+                console.log('Onboarding - Fetching user data...');
+                const response = await clientApi.get<User>('/api/user/self');
+                
+                if (response.error) {
+                    throw new Error(response.message || 'Failed to fetch user data');
+                }
+
+                if (!response.data) {
+                    throw new Error('No data received from server');
+                }
+
+                const user = response.data;
                 setFormData({
                     firstName: user.firstName,
                     lastName: user.lastName,
@@ -66,10 +89,10 @@ export default function OnboardingPage() {
                     email: user.email,
                     gender: user.gender === null ? 'male' : user.gender,
                     age: user.age,
-                })
+                });
             } catch (error) {
                 console.error("Error during user fetch: ", error);
-                showSnackbar("Error fetching user from server", true);
+                showSnackbar(error instanceof Error ? error.message : "Error fetching user data", true);
             }
         }
 

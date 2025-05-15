@@ -1,27 +1,48 @@
 import { exchangeToken } from "@/services/auth";
-import { cookies } from "next/headers";
+import { OAuthCallbackResponse } from "@/types/response/oauthCallbackResponse";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
     try {
+        console.log("--------------------------------");
+        console.log("Exchange token request received");
+        console.log("--------------------------------");
         const body = await request.json();
-        const {tempToken} = body;
 
-        const serverResponse = await exchangeToken(tempToken);
-        const token = serverResponse.token;
+        const serverResponse : OAuthCallbackResponse = await exchangeToken(body);
+        const { token, user } = serverResponse;
 
-        (await cookies()).set("refreshToken", token.refreshToken, {
+        console.log("Token received:", token);
+
+        // Create the response with user data only
+        const response = NextResponse.json({
+            data: { user }
+        });
+
+        // Set both tokens as HTTP-only cookies
+        response.cookies.set("accessToken", token.accessToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             sameSite: "strict",
             path: "/",
-            maxAge: 60 * 60 * 24 // 1day
-        })
+            maxAge: 60 * 60 // 1 hour
+        });
 
-        return NextResponse.json({accessToken: token.accessToken});
+        response.cookies.set("refreshToken", token.refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+            path: "/",
+            maxAge: 60 * 60 * 24 // 1 day
+        });
+
+        return response;
         
     } catch (error) {
         console.error("Error during signin", error);
-        return NextResponse.json({error: error instanceof Error ? error.message : "Internal server error"}, {status: 500});
+        return NextResponse.json({
+            error: true,
+            message: error instanceof Error ? error.message : "Internal server error"
+        }, {status: 500});
     }
 }
