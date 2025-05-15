@@ -6,6 +6,7 @@ import { UpdateUserRequest } from "@/types/request/updateUserRequest";
 export const self = async (): Promise<User> => {
     try {
         const response = await protectedApi.self();
+        console.log(response.data);
         if (response.data) {
             if (!response.data.error) {
                 // success

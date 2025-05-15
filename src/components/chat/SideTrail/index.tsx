@@ -1,8 +1,10 @@
 import React from 'react';
 import { SideTrailProps } from './types';
 import { createStyles } from './styles';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faComment, faGear } from '@fortawesome/free-solid-svg-icons';
 
-const { SideTrail, TrailIcon, OpenDrawerButton, UserAvatar } = createStyles({ trailWidth: 80 });
+const { SideTrail, TrailIcon, OpenDrawerButton, UserAvatar } = createStyles({ trailWidth: 40 });
 
 const SideTrailComponent: React.FC<SideTrailProps> = ({
   isSidebarOpen,
@@ -35,7 +37,7 @@ const SideTrailComponent: React.FC<SideTrailProps> = ({
         onClick={() => onIconClick('chat')}
         title="Chat"
       >
-        💬
+        <FontAwesomeIcon icon={faComment} />
       </TrailIcon>
 
       {/* Configuration Icon */}
@@ -44,7 +46,7 @@ const SideTrailComponent: React.FC<SideTrailProps> = ({
         onClick={() => onIconClick('config')}
         title="Configuration"
       >
-        ⚙️
+        <FontAwesomeIcon icon={faGear} />
       </TrailIcon>
 
       {/* User Avatar */}

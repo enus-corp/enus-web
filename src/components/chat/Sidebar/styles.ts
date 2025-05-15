@@ -12,7 +12,7 @@ export const createStyles = ({ drawerWidth }: { drawerWidth: number }) => ({
 
     /* Drawer specific styles for PUSH behavior */
     position: fixed;
-    left: 80px; /* Adjusted to match new side trail width */
+    left: 60px; /* Adjusted to match new side trail width */
     top: 0;
     height: 100%;
     z-index: 900; 

@@ -4,7 +4,6 @@ import { createStyles } from './styles';
 
 const styles = createStyles({
   drawerWidth: 280,
-  trailWidth: 60
 })
 
 const ChatHistory: React.FC<ChatHistoryProps> = ({

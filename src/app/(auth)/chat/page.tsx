@@ -18,6 +18,7 @@ import { setUser } from '@/store/slices/userSlice';
 import { setChatHistory, setCurrentChatId, setMessages, addMessage, setActiveIcon, toggleSidebar, toggleModal } from '@/store/slices/chatSlice';
 import { ChatHistoryItem } from '@/components/chat/Sidebar/types';
 import { User } from '@/types/user';
+import clientApi from '@/services/clientApi';
 
 
 // --- Styled Components ---
@@ -49,7 +50,7 @@ const ChatPage: React.FC = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const user = await self();
+        const user = await clientApi.get("/api/user/self")
         dispatch(setUser(user));
       } catch (error) {
         console.error('Failed to fetch user data:', error);

@@ -1,8 +1,8 @@
 import styled from 'styled-components';
 
 const TrailIcon = styled.div<{ $isActive: boolean }>`
-  width: 48px;
-  height: 48px;
+  width: 36px;
+  height: 36px;
   background-color: ${props => props.$isActive ? '#A0D9B1' : '#6C757D'};
   border-radius: 6px;
   cursor: pointer;
@@ -31,8 +31,8 @@ const OpenDrawerButton = styled(TrailIcon)`
 `;
 
 const UserAvatar = styled.div`
-  width: 48px;
-  height: 48px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   background-color: #A0D9B1;
   display: flex;
@@ -56,7 +56,7 @@ export const createStyles = ({ trailWidth }: { trailWidth: number }) => ({
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 30px 10px;
+    padding: 30px;
     gap: 25px;
     position: fixed;
     left: 0;
